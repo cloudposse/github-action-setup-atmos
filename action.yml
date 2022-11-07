@@ -1,0 +1,20 @@
+name: "setup-atmos"
+description: "A GitHub Action to setup the Atmos CLI"
+author: hello@cloudposse.com
+branding:
+  icon: "terminal"
+  color: "blue"
+inputs:
+  atmos_version:
+    description: "The version of atmos CLI to install. Defaults to `latest`."
+    default: "1.12.2"
+    required: false
+  atmos_wrapper:
+    description: |-
+      Whether or not to install a wrapper to wrap subsequent calls of the `atmos` binary and expose its STDOUT, 
+      STDERR,and exit code as outputs named `stdout`, `stderr`, and `exitcode` respectively. Defaults to `true`.
+    default: "true"
+    required: false
+runs:
+  using: node16
+  main: "dist/index.js"
