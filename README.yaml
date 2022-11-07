@@ -1,0 +1,57 @@
+---
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+# Name of this project
+name: github-action-setup-atmos
+
+# Tags of this project
+tags:
+  - github-action
+  - atmos
+
+# Logo for this project
+#logo: docs/logo.png
+
+# License of this project
+license: "APACHE2"
+
+# Canonical GitHub repo
+github_repo: cloudposse/github-action-setup-atmos
+
+# Badges to display
+badges:
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/github-action-setup-atmos.svg"
+    url: "https://github.com/cloudposse/github-action-setup-atmos/releases/latest"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+
+related: []
+
+# Short description of this project
+description: Template repo for GitHub Actions written in TypeScript
+
+introduction: |-
+  This repo is a template for GitHub Actions written in TypeScript.
+references:
+  - name: "github-actions-workflows"
+    description: "Reusable workflows for different types of projects"
+    url: "https://github.com/cloudposse/github-actions-workflows"
+  - name: "example-github-action-release-workflow"
+    description: "Example application with complicated release workflow"
+    url: "https://github.com/cloudposse/example-github-action-release-workflow"
+
+# How to use this project
+usage: "TODO: Update this."
+
+include:
+  - github-action
+
+# Contributors to this project
+contributors:
+  - name: "Matt Calhoun"
+    github: "mcalhoun"

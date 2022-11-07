@@ -1,0 +1,41 @@
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "yarn"
+
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile --prefer-offline
+
+      - name: Linting
+        run: yarn lint
+
+      - name: Format Source Code
+        run: yarn format
+
+      - name: Unit Tests
+        run: yarn test
+
+      - name: Build
+        run: yarn build
+
+      - name: Commit and Push Changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          committer_name: GitHub Actions
+          # https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/
+          message: "chore: [skip-ci] format code and generate build artifacts"
+          add: "."
+          push: origin HEAD:${{ github.head_ref }}
