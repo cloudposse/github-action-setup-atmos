@@ -31,6 +31,11 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Verify Action Works
+        uses: ./
+        with:
+          atmos_version: 1.12.2
+
       - name: Commit and Push Changes
         uses: EndBug/add-and-commit@v9
         with:
