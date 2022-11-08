@@ -1,9 +1,6 @@
 on:
   workflow_dispatch:
-
   pull_reqest:
-    branches:
-      - "*"
 
 jobs:
   build:
@@ -31,7 +28,7 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Verify Action Works
+      - name: Integration Test
         uses: ./
         with:
           atmos_version: 1.12.2
