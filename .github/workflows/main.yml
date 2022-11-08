@@ -1,6 +1,6 @@
 on:
   workflow_dispatch:
-  pull_reqest:
+  pull_request:
 
 jobs:
   build:
