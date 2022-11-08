@@ -6254,7 +6254,8 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
         // Gather GitHub Actions inputs
         const version = core_1.default.getInput("atmos_version");
         //const wrapper = core.getInput("atmos_wrapper") === "true";
-        const installPath = core_1.default.getInput("atmos_path") || undefined;
+        //const installPath = core.getInput("atmos_path") || undefined;
+        const installPath = undefined;
         // Gather OS details
         const osPlatform = os_1.default.platform();
         const osArch = os_1.default.arch();
