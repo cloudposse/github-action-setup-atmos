@@ -100,7 +100,7 @@ export const run = async () => {
     core.setOutput("path", cliPath);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    if (error instanceof Error) core.setFailed(error.message);
+    core.error(error);
   }
 };
 
