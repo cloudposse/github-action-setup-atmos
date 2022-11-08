@@ -1,15 +1,12 @@
 on:
   workflow_dispatch:
-  pull_request:
+  pull_reqest:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.ref }}
-          fetch-depth: 0
 
       - uses: actions/setup-node@v3
         with:
@@ -31,6 +28,11 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Integration Test
+        uses: ./
+        with:
+          atmos_version: 1.12.2
+
       - name: Commit and Push Changes
         uses: EndBug/add-and-commit@v9
         with:
@@ -38,4 +40,3 @@ jobs:
           # https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/
           message: "chore: [skip-ci] format code and generate build artifacts"
           add: "."
-          push: origin HEAD:${{ github.head_ref }}
