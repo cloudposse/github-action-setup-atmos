@@ -6274,8 +6274,8 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
     catch (error) {
-        if (error instanceof Error)
-            core_1.default.setFailed(error.message);
+        core_1.default.error(error);
+        throw error;
     }
 });
 exports.run = run;
