@@ -101,6 +101,7 @@ export const run = async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     core.error(error);
+    throw error;
   }
 };
 
