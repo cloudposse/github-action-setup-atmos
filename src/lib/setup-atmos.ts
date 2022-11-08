@@ -74,7 +74,8 @@ export const run = async () => {
     // Gather GitHub Actions inputs
     const version = core.getInput("atmos_version");
     //const wrapper = core.getInput("atmos_wrapper") === "true";
-    const installPath = core.getInput("atmos_path") || undefined;
+    //const installPath = core.getInput("atmos_path") || undefined;
+    const installPath = undefined;
 
     // Gather OS details
     const osPlatform = os.platform();
