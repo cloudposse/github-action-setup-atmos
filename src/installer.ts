@@ -164,7 +164,7 @@ export const installWrapperBin = async (
     );
     destination = [atmosDownloadPath, "atmos"].join(path.sep);
 
-    core.debug(`Copying ${source} to ${destination}.`);
+    core.info(`Installing wrapper script from ${source} to ${destination}.`);
     await io.cp(source, destination);
   } catch (e) {
     core.error(`Unable to copy ${source} to ${destination}.`);
@@ -202,7 +202,7 @@ export const installAtmosVersion = async (
     await installWrapperBin(downloadDir);
   }
 
-  core.info("Adding to the cache ...");
+  core.info("Adding atmos to the tool cache ...");
   const cachedDir = await tc.cacheDir(
     downloadDir,
     "atmos",
