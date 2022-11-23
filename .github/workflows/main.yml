@@ -10,8 +10,8 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
-          cache: "yarn"
+          node-version-file: package.json
+          cache: yarn
 
       - name: Install Dependencies
         run: yarn --frozen-lockfile --prefer-offline
@@ -26,12 +26,22 @@ jobs:
         run: yarn test
 
       - name: Build
-        run: yarn build
+        run: |
+          yarn build
+          yarn build:wrapper
 
       - name: Integration Test
         uses: ./
         with:
-          atmos_version: 1.12.2
+          atmos-version: latest
+
+      - run: atmos version
+
+      - name: Verify outputs are available
+        run: |
+          echo "stdout: ${{ steps.atmos.outputs.stdout }}"
+          echo "stderr: ${{ steps.atmos.outputs.stderr }}"
+          echo "exitcode: ${{ steps.atmos.outputs.exitcode }}"
 
       - name: Commit and Push Changes
         uses: EndBug/add-and-commit@v9

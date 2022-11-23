@@ -1,5 +1,5 @@
 module.exports = {
-  clearMocks: true,
+  //clearMocks: true,
   moduleFileExtensions: ["js", "ts"],
   testMatch: ["**/*.test.ts"],
   transform: {
@@ -7,3 +7,4 @@ module.exports = {
   },
   verbose: true,
 };
+

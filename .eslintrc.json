@@ -4,13 +4,44 @@
     "node": true,
     "jest/globals": true
   },
-  "extends": ["eslint:recommended", "prettier", "plugin:@typescript-eslint/recommended"],
+  "extends": [
+    "eslint:recommended",
+    "prettier",
+    "plugin:@typescript-eslint/recommended"
+  ],
   "overrides": [],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint", "jest"],
-  "rules": {}
+  "plugins": ["@typescript-eslint", "jest", "import", "sort-destructure-keys"],
+  "rules": {
+    "@typescript-eslint/interface-name-prefix": "off",
+    "@typescript-eslint/no-use-before-define": "warn",
+    "import/order": [
+      "error",
+      {
+        "alphabetize": { "order": "asc", "caseInsensitive": true },
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index"
+        ],
+        "newlines-between": "always",
+        "pathGroups": [
+          {
+            // This public-path import MUST be at the very top of each entry point file to set the proper webpack base URL for static assets. https://webpack.js.org/guides/public-path/#on-the-fly
+            "pattern": "./assets/public-path",
+            "group": "builtin",
+            "position": "before"
+          }
+        ]
+      }
+    ]
+  }
 }
+
