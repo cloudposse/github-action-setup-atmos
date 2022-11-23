@@ -183,14 +183,14 @@ export const installAtmosVersion = async (
 ): Promise<string> => {
   core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
 
-  const downloadPath = await tc.downloadTool(info.downloadUrl, auth);
-  const downloadDir = path.dirname(downloadPath);
+  const downloadPath = await tc.downloadTool(info.downloadUrl, undefined, auth);
+  //const downloadDir = path.dirname(downloadPath);
 
   core.info("Renaming Atmos...");
   const atmosBinName = installWrapper
     ? getAtmosWrappedBinaryName()
     : getAtmosBinaryName();
-  const destination = [downloadDir, atmosBinName].join(path.sep);
+  const destination = [downloadPath, atmosBinName].join(path.sep);
 
   fs.renameSync(downloadPath, destination);
   fs.chmodSync(destination, 755);
@@ -199,12 +199,12 @@ export const installAtmosVersion = async (
   );
 
   if (installWrapper) {
-    await installWrapperBin(downloadDir);
+    await installWrapperBin(downloadPath);
   }
 
   core.info("Adding atmos to the tool cache ...");
   const cachedDir = await tc.cacheDir(
-    downloadDir,
+    downloadPath,
     "atmos",
     makeSemver(info.resolvedVersion),
     arch
@@ -251,12 +251,10 @@ export const getAtmos = async (
       toolPath = path.join(toolPath);
     }
 
-    // prepend the tools path. instructs the agent to prepend for future tasks
     core.addPath(toolPath);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
-    core.error(err);
-    throw new Error(`Failed to download version ${versionSpec}: ${err}`);
+    core.setFailed(err);
   }
 
   return { toolPath, info };
