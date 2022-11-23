@@ -14,3 +14,4 @@
 | Name | Description |
 |------|-------------|
 | atmos-version | The installed atmos version. |
+<!-- markdownlint-restore -->
