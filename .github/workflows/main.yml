@@ -16,14 +16,14 @@ jobs:
       - name: Install Dependencies
         run: yarn --frozen-lockfile --prefer-offline
 
-      - name: Linting
-        run: yarn lint
+      # - name: Linting
+      #   run: yarn lint
 
-      - name: Format Source Code
-        run: yarn format
+      # - name: Format Source Code
+      #   run: yarn format
 
-      - name: Unit Tests
-        run: yarn test
+      # - name: Unit Tests
+      #   run: yarn test
 
       - name: Build
         run: |
@@ -34,7 +34,7 @@ jobs:
         uses: ./
         with:
           atmos-version: latest
-          install-wrapper: false
+          install-wrapper: true
 
       - run: atmos version
 
@@ -44,10 +44,10 @@ jobs:
           echo "stderr: ${{ steps.atmos.outputs.stderr }}"
           echo "exitcode: ${{ steps.atmos.outputs.exitcode }}"
 
-      - name: Commit and Push Changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          committer_name: GitHub Actions
-          # https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/
-          message: "chore: [skip-ci] format code and generate build artifacts"
-          add: "."
+      # - name: Commit and Push Changes
+      #   uses: EndBug/add-and-commit@v9
+      #   with:
+      #     committer_name: GitHub Actions
+      #     # https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/
+      #     message: "chore: [skip-ci] format code and generate build artifacts"
+      #     add: "."

@@ -153,26 +153,34 @@ export const getMatchingVersion = async (
 };
 
 export const installWrapperBin = async (
-  atmosDownloadPath: string
-): Promise<void> => {
+  atmosDownloadPath: string,
+  version: string,
+  arch: string
+): Promise<string> => {
   let source = "";
-  let destination = "";
+  const destination = "";
 
   try {
     source = path.resolve(
       [__dirname, "..", "dist", "wrapper", "index.js"].join(path.sep)
     );
-    destination = [atmosDownloadPath, "atmos"].join(path.sep);
+    //destination = [atmosDownloadPath, "atmos"].join(path.sep);
 
-    core.info(`Installing wrapper script from ${source} to ${destination}.`);
-    await io.cp(source, destination);
-  } catch (e) {
+    //core.info(`Installing wrapper script from ${source} to ${destination}.`);
+    //await io.cp(source, destination);
+
+    core.info("Adding atmos wrapper to the tool cache...");
+    const toolPath = tc.cacheFile(source, "atmos", "atmos", version, arch);
+
+    // Export a new environment variable, so our wrapper can locate the binary
+    core.exportVariable("ATMOS_CLI_PATH", toolPath);
+
+    return toolPath;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (e: any) {
     core.error(`Unable to copy ${source} to ${destination}.`);
     throw e;
   }
-
-  // Export a new environment variable, so our wrapper can locate the binary
-  core.exportVariable("ATMOS_CLI_PATH", path.dirname(destination));
 };
 
 export const installAtmosVersion = async (
@@ -182,32 +190,34 @@ export const installAtmosVersion = async (
   installWrapper: boolean
 ): Promise<string> => {
   core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
+  const resolvedVersion = makeSemver(info.resolvedVersion);
 
   const downloadPath = await tc.downloadTool(info.downloadUrl, undefined, auth);
-  const downloadDir = [path.dirname(downloadPath), "atmos"].join(path.sep);
-  await io.mkdirP(downloadDir);
+  const downloadDir = path.dirname(downloadPath);
+  //await io.mkdirP(downloadDir);
 
-  core.info("Renaming Atmos...");
+  //core.info("Renaming Atmos...");
   const atmosBinName = installWrapper
     ? getAtmosWrappedBinaryName()
     : getAtmosBinaryName();
-  const destination = [downloadDir, atmosBinName].join(path.sep);
+  // const destination = [downloadDir, atmosBinName].join(path.sep);
 
-  fs.renameSync(downloadPath, destination);
-  fs.chmodSync(destination, 755);
-  core.info(
-    `Successfully renamed atmos from ${downloadPath} to ${destination}`
-  );
+  //fs.renameSync(downloadPath, destination);
+  fs.chmodSync(downloadPath, 755);
+  // core.info(
+  //   `Successfully renamed atmos from ${downloadPath} to ${destination}`
+  // );
 
   if (installWrapper) {
-    await installWrapperBin(downloadDir);
+    await installWrapperBin(downloadDir, resolvedVersion, arch);
   }
 
   core.info("Adding atmos to the tool cache ...");
-  const cachedDir = await tc.cacheDir(
-    downloadDir,
+  const cachedDir = await tc.cacheFile(
+    downloadPath,
+    atmosBinName,
     "atmos",
-    makeSemver(info.resolvedVersion),
+    resolvedVersion,
     arch
   );
 
