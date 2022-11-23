@@ -98,7 +98,7 @@ describe("Setup Atmos", () => {
     expect(wrapperInstallMock).not.toHaveBeenCalled();
   });
 
-  it.skip("installs atmos with wrapper", async () => {
+  it("installs atmos with wrapper", async () => {
     setupSpies("latest", "1.15.0", true);
 
     const wrapperInstallMock = jest.spyOn(io, "cp");
@@ -108,7 +108,7 @@ describe("Setup Atmos", () => {
 
     expect(wrapperInstallMock).toHaveBeenCalledWith(
       [path.resolve(), "dist", "wrapper", "index.js"].join(path.sep),
-      [path.resolve(), "src", "atmos", "atmos"].join(path.sep)
+      [".", "atmos", "atmos"].join(path.sep)
     );
   });
 });
