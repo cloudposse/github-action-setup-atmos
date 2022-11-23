@@ -32,14 +32,7 @@
           "index"
         ],
         "newlines-between": "always",
-        "pathGroups": [
-          {
-            // This public-path import MUST be at the very top of each entry point file to set the proper webpack base URL for static assets. https://webpack.js.org/guides/public-path/#on-the-fly
-            "pattern": "./assets/public-path",
-            "group": "builtin",
-            "position": "before"
-          }
-        ]
+        "pathGroups": []
       }
     ]
   }
