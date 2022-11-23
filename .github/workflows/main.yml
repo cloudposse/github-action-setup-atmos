@@ -34,6 +34,7 @@ jobs:
         uses: ./
         with:
           atmos-version: latest
+          install-wrapper: false
 
       - run: atmos version
 
