@@ -1,6 +1,7 @@
 import cp from "child_process";
 import fs from "fs";
 import os from "os";
+import path from "path";
 
 import * as core from "@actions/core";
 import * as io from "@actions/io";
@@ -107,7 +108,9 @@ describe("Setup Atmos", () => {
 
     expect(wrapperInstallMock).toHaveBeenCalledWith(
       "atmos_1.15.0_linux_amd64",
-      "atmos-bin"
+      [path.resolve(__dirname, "..", "..", ".."), "atmos", "atmos-bin"].join(
+        path.sep
+      )
     );
   });
 });
