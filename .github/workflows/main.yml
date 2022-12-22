@@ -36,6 +36,9 @@ jobs:
           atmos-version: latest
           install-wrapper: true
 
+      - if: always()
+        run: ls -R
+
       - run: atmos version
 
       - name: Verify outputs are available
