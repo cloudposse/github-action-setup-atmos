@@ -209,15 +209,15 @@ export const installAtmosVersion = async (
   }
 
   core.info("Adding atmos to the tool cache ...");
-  const cachedDir = await tc.cacheDir(
-    path.dirname(toolPath),
-    atmosBinName,
-    resolvedVersion,
-    arch
-  );
+  // const cachedDir = await tc.cacheDir(
+  //   path.dirname(toolPath),
+  //   "atmos",
+  //   resolvedVersion,
+  //   arch
+  // );
 
-  core.info(`Successfully cached atmos to ${cachedDir}`);
-  return cachedDir;
+  //core.info(`Successfully cached atmos to ${cachedDir}`);
+  return path.dirname(toolPath);
 };
 
 export const getAtmos = async (
