@@ -194,12 +194,13 @@ export const installAtmosVersion = async (
 
   const downloadPath = await tc.downloadTool(info.downloadUrl, undefined, auth);
   const downloadDir = path.dirname(downloadPath);
+  const toolDir = [".", "atmosbin"].join(path.sep);
 
   core.info("Renaming Atmos...");
   const atmosBinName = installWrapper
     ? getAtmosWrappedBinaryName()
     : getAtmosBinaryName();
-  const destination = [downloadDir, atmosBinName].join(path.sep);
+  const destination = [toolDir, atmosBinName].join(path.sep);
 
   fs.renameSync(downloadPath, destination);
   core.info(
@@ -214,7 +215,7 @@ export const installAtmosVersion = async (
 
   core.info("Adding atmos to the tool cache ...");
   const cachedDir = await tc.cacheDir(
-    downloadPath,
+    toolDir,
     atmosBinName,
     resolvedVersion,
     arch
