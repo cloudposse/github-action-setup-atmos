@@ -193,7 +193,9 @@ export const installAtmosVersion = async (
   const resolvedVersion = makeSemver(info.resolvedVersion);
 
   const downloadPath = await tc.downloadTool(info.downloadUrl, undefined, auth);
+  core.info(`Download path ${downloadPath}`);
   const downloadDir = path.dirname(downloadPath);
+  core.info(`Download dir ${downloadDir}`);
   const toolDir = [".", "atmosbin"].join(path.sep);
 
   core.info("Renaming Atmos...");
