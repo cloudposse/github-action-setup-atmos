@@ -43,9 +43,11 @@ jobs:
       - name: atmos
         run: |
           which atmos 
-          which atmos-bin 
+          which atmos-bin
+          which node
           echo $ATMOS_CLI_PATH
-          atmos version
+          atmos-bin version
+          node atmos version
 
       - name: Verify outputs are available
         run: |
