@@ -166,6 +166,7 @@ export const installWrapperBin = async (
 
     core.info(`Installing wrapper script from ${source} to ${destination}.`);
     await io.cp(source, destination);
+    fs.chmodSync(destination, 755);
 
     // Export a new environment variable, so our wrapper can locate the binary
     core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
