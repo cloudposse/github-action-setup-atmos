@@ -165,6 +165,7 @@ export const installWrapperBin = async (
     destination = [atmosDownloadPath, "atmos"].join(path.sep);
 
     core.info(`Installing wrapper script from ${source} to ${destination}.`);
+
     await io.cp(source, destination);
     fs.chmodSync(destination, 755);
 
@@ -189,10 +190,12 @@ export const installAtmosVersion = async (
     ? getAtmosWrappedBinaryName()
     : getAtmosBinaryName();
 
+  const homeDir = path.resolve([__dirname, "..", ".."].join(path.sep));
+  const atmosInstallPath = [homeDir, "atmos"].join(path.sep);
+
   core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
   const downloadPath = await tc.downloadTool(info.downloadUrl, undefined, auth);
-  const toolPath = path.join(path.dirname(downloadPath), atmosBinName);
-  const toolDir = path.dirname(toolPath);
+  const toolPath = path.join(atmosInstallPath, atmosBinName);
 
   core.info("Renaming downloaded file...");
   await io.mv(downloadPath, toolPath);
@@ -201,11 +204,11 @@ export const installAtmosVersion = async (
   fs.chmodSync(toolPath, 755);
 
   if (installWrapper) {
-    await installWrapperBin(toolDir);
+    await installWrapperBin(atmosInstallPath);
   }
 
-  core.info(`Successfully installed atmos to ${toolDir}`);
-  return toolDir;
+  core.info(`Successfully installed atmos to ${atmosInstallPath}`);
+  return atmosInstallPath;
 };
 
 export const getAtmos = async (
