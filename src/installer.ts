@@ -156,16 +156,16 @@ export const installWrapperBin = async (
   atmosDownloadPath: string
 ): Promise<string> => {
   let source = "";
-  const destination = "";
+  let destination = "";
 
   try {
     source = path.resolve(
       [__dirname, "..", "dist", "wrapper", "index.js"].join(path.sep)
     );
-    const destinationFile = [atmosDownloadPath, "atmos"].join(path.sep);
+    destination = [atmosDownloadPath, "atmos"].join(path.sep);
 
     core.info(`Installing wrapper script from ${source} to ${destination}.`);
-    await io.cp(source, destinationFile);
+    await io.cp(source, destination);
 
     // Export a new environment variable, so our wrapper can locate the binary
     core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
