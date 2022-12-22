@@ -194,19 +194,19 @@ export const installAtmosVersion = async (
 
   const downloadPath = await tc.downloadTool(info.downloadUrl, undefined, auth);
   const downloadDir = path.dirname(downloadPath);
-  await io.mkdirP("atmos");
 
   core.info("Renaming Atmos...");
   const atmosBinName = installWrapper
     ? getAtmosWrappedBinaryName()
     : getAtmosBinaryName();
-  const destination = [".", "atmos", "atmos"].join(path.sep);
+  const destination = [downloadDir, atmosBinName].join(path.sep);
 
   fs.renameSync(downloadPath, destination);
-  fs.chmodSync(destination, 755);
   core.info(
     `Successfully renamed atmos from ${downloadPath} to ${destination}`
   );
+
+  fs.chmodSync(destination, 755);
 
   if (installWrapper) {
     await installWrapperBin(downloadDir, resolvedVersion, arch);
@@ -245,7 +245,6 @@ export const getAtmos = async (
   core.info(`Attempting to download ${versionSpec}...`);
   let info: IAtmosVersionInfo | null = null;
 
-  core.info("Download from GitHub");
   info = await getMatchingVersion(versionSpec, auth, arch);
   if (!info) {
     throw new Error(
@@ -254,7 +253,7 @@ export const getAtmos = async (
   }
 
   try {
-    core.info("Install from GitHub");
+    core.info(`Installing version ${info.resolvedVersion} from GitHub`);
     toolPath = await installAtmosVersion(info, undefined, arch, installWrapper);
 
     if (osPlat != "win32") {
