@@ -1,8 +1,6 @@
-import cp from "child_process";
 import os from "os";
 
 import * as core from "@actions/core";
-import * as io from "@actions/io";
 
 import * as installer from "./installer";
 
@@ -27,11 +25,6 @@ export const run = async () => {
     core.info(
       `Successfully set up Atmos version ${versionSpec} in ${toolPath}`
     );
-
-    // output the version actually being used
-    const atmosPath = await io.which("atmos");
-    const atmosVersion = (cp.execSync(`${atmosPath} version`) || "").toString();
-    core.info(`version from installed binary ${atmosVersion}`);
 
     core.setOutput("atmos-version", info?.resolvedVersion);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

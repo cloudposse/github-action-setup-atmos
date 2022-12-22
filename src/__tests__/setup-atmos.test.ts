@@ -1,7 +1,6 @@
 import cp from "child_process";
 import fs from "fs";
 import os from "os";
-import path from "path";
 
 import * as core from "@actions/core";
 import * as io from "@actions/io";
@@ -101,14 +100,14 @@ describe("Setup Atmos", () => {
   it("installs atmos with wrapper", async () => {
     setupSpies("latest", "1.15.0", true);
 
-    const wrapperInstallMock = jest.spyOn(io, "cp");
+    const wrapperInstallMock = jest.spyOn(io, "mv");
 
     await run();
     nockDoneCb();
 
     expect(wrapperInstallMock).toHaveBeenCalledWith(
-      [path.resolve(), "dist", "wrapper", "index.js"].join(path.sep),
-      [".", "atmos", "atmos"].join(path.sep)
+      "atmos_1.15.0_linux_amd64",
+      "atmos-bin"
     );
   });
 });

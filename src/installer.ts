@@ -153,9 +153,7 @@ export const getMatchingVersion = async (
 };
 
 export const installWrapperBin = async (
-  atmosDownloadPath: string,
-  version: string,
-  arch: string
+  atmosDownloadPath: string
 ): Promise<string> => {
   let source = "";
   const destination = "";
@@ -169,9 +167,6 @@ export const installWrapperBin = async (
     core.info(`Installing wrapper script from ${source} to ${destination}.`);
     await io.cp(source, destinationFile);
 
-    //core.info("Adding atmos wrapper to the tool cache...");
-    //const toolPath = tc.cacheFile(source, "atmos", "atmos", version, arch);
-
     // Export a new environment variable, so our wrapper can locate the binary
     core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
 
@@ -179,7 +174,7 @@ export const installWrapperBin = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     core.setFailed(`Unable to copy ${source} to ${destination}.`);
-    return "";
+    throw e;
   }
 };
 
@@ -194,30 +189,21 @@ export const installAtmosVersion = async (
     : getAtmosBinaryName();
 
   core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
-  const resolvedVersion = makeSemver(info.resolvedVersion);
   const downloadPath = await tc.downloadTool(info.downloadUrl, undefined, auth);
   const toolPath = path.join(path.dirname(downloadPath), atmosBinName);
   const toolDir = path.dirname(toolPath);
 
-  core.info("Renaming Atmos...");
+  core.info("Renaming downloaded file...");
   await io.mv(downloadPath, toolPath);
   core.info(`Successfully renamed atmos from ${downloadPath} to ${toolPath}`);
 
   fs.chmodSync(toolPath, 755);
 
   if (installWrapper) {
-    await installWrapperBin(toolDir, resolvedVersion, arch);
+    await installWrapperBin(toolDir);
   }
 
-  core.info("Adding atmos to the tool cache ...");
-  // const cachedDir = await tc.cacheDir(
-  //   path.dirname(toolPath),
-  //   "atmos",
-  //   resolvedVersion,
-  //   arch
-  // );
-
-  //core.info(`Successfully cached atmos to ${cachedDir}`);
+  core.info(`Successfully installed atmos to ${toolDir}`);
   return toolDir;
 };
 
