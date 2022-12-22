@@ -200,7 +200,7 @@ export const installAtmosVersion = async (
   core.info(`Download path ${downloadPath}`);
   const downloadDir = path.dirname(downloadPath);
   core.info(`Download dir ${downloadDir}`);
-  const toolDir = [".", "atmosbin"].join(path.sep);
+  const toolDir = path.resolve(__dirname);
 
   core.info("Renaming Atmos...");
 
