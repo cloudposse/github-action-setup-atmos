@@ -2,6 +2,10 @@ on:
   workflow_dispatch:
   pull_request:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -37,7 +41,11 @@ jobs:
           install-wrapper: true
 
       - name: atmos
-        run: atmos version
+        run: |
+          which atmos 
+          which atmos-bin 
+          echo $ATMOS_CLI_PATH
+          atmos version
 
       - name: Verify outputs are available
         run: |
