@@ -22,3 +22,4 @@ export const getArch = (arch: string): string => {
   }
   return arch;
 };
+

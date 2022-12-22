@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import * as io from "@actions/io";
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
-import { OutputListener } from "./output-listener";
-import { getAtmosWrappedPath } from "./atmos-bin";
+import * as io from "@actions/io";
 
+import { getAtmosWrappedPath } from "./atmos-bin";
+import { OutputListener } from "./output-listener";
 
 const pathToCLI = getAtmosWrappedPath();
 
@@ -54,6 +54,4 @@ const guardAtmosInstalled = async () => {
   // A non-zero exitCode is considered an error
   core.setFailed(`Atmos exited with code ${exitCode}.`);
 })();
-
-
 
