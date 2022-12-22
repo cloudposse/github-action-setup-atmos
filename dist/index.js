@@ -26366,36 +26366,43 @@ const findVersionMatch = (versionSpec, arch = os_1.default.arch(), candidates) =
 };
 exports.findVersionMatch = findVersionMatch;
 const getVersionsFromGitHubReleases = (auth) => __awaiter(void 0, void 0, void 0, function* () {
-    var e_1, _a;
+    var _a, e_1, _b, _c;
     const octokit = new octokit_1.Octokit({ auth });
     const versions = [];
     try {
-        for (var _b = __asyncValues(octokit.paginate.iterator(octokit.rest.repos.listReleases, {
+        for (var _d = true, _e = __asyncValues(octokit.paginate.iterator(octokit.rest.repos.listReleases, {
             owner: "cloudposse",
             repo: "atmos",
-        })), _c; _c = yield _b.next(), !_c.done;) {
-            const release = _c.value;
-            release.data.forEach((r) => {
-                const { tag_name, prerelease } = r;
-                if (!tag_name) {
-                    throw new Error(`Release tag is empty`);
-                }
-                const assets = r.assets.map((asset) => {
-                    const { name, browser_download_url } = asset;
-                    const parts = asset.name.split("_");
-                    const os = parts[2];
-                    const arch = parts[3];
-                    return { name, os, arch, browser_download_url };
+        })), _f; _f = yield _e.next(), _a = _f.done, !_a;) {
+            _c = _f.value;
+            _d = false;
+            try {
+                const release = _c;
+                release.data.forEach((r) => {
+                    const { tag_name, prerelease } = r;
+                    if (!tag_name) {
+                        throw new Error(`Release tag is empty`);
+                    }
+                    const assets = r.assets.map((asset) => {
+                        const { name, browser_download_url } = asset;
+                        const parts = asset.name.split("_");
+                        const os = parts[2];
+                        const arch = parts[3];
+                        return { name, os, arch, browser_download_url };
+                    });
+                    const version = { name: tag_name, prerelease, assets };
+                    versions.push(version);
                 });
-                const version = { name: tag_name, prerelease, assets };
-                versions.push(version);
-            });
+            }
+            finally {
+                _d = true;
+            }
         }
     }
     catch (e_1_1) { e_1 = { error: e_1_1 }; }
     finally {
         try {
-            if (_c && !_c.done && (_a = _b.return)) yield _a.call(_b);
+            if (!_d && !_a && (_b = _e.return)) yield _b.call(_e);
         }
         finally { if (e_1) throw e_1.error; }
     }
@@ -26439,19 +26446,20 @@ const installAtmosVersion = (info, auth, arch, installWrapper) => __awaiter(void
     const atmosBinName = installWrapper
         ? (0, atmos_bin_1.getAtmosWrappedBinaryName)()
         : (0, atmos_bin_1.getAtmosBinaryName)();
+    const homeDir = path.resolve([__dirname, "..", ".."].join(path.sep));
+    const atmosInstallPath = [homeDir, "atmos"].join(path.sep);
     core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
     const downloadPath = yield tc.downloadTool(info.downloadUrl, undefined, auth);
-    const toolPath = path.join(path.dirname(downloadPath), atmosBinName);
-    const toolDir = path.dirname(toolPath);
+    const toolPath = path.join(atmosInstallPath, atmosBinName);
     core.info("Renaming downloaded file...");
     yield io.mv(downloadPath, toolPath);
     core.info(`Successfully renamed atmos from ${downloadPath} to ${toolPath}`);
     fs_1.default.chmodSync(toolPath, 755);
     if (installWrapper) {
-        yield (0, exports.installWrapperBin)(toolDir);
+        yield (0, exports.installWrapperBin)(atmosInstallPath);
     }
-    core.info(`Successfully installed atmos to ${toolDir}`);
-    return toolDir;
+    core.info(`Successfully installed atmos to ${atmosInstallPath}`);
+    return atmosInstallPath;
 });
 exports.installAtmosVersion = installAtmosVersion;
 const getAtmos = (versionSpec, auth, arch = os_1.default.arch(), installWrapper) => __awaiter(void 0, void 0, void 0, function* () {

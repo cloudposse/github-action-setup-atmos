@@ -7,7 +7,6 @@ import { getAtmosWrappedPath } from "./atmos-bin";
 import { OutputListener } from "./output-listener";
 
 const pathToCLI = getAtmosWrappedPath();
-console.log("path: " + pathToCLI);
 
 const guardAtmosInstalled = async () => {
   // Setting check to `true` will cause `which` to throw if atmos isn't found
@@ -17,8 +16,10 @@ const guardAtmosInstalled = async () => {
 
 (async () => {
   try {
+    core.info("path: " + pathToCLI);
     // This will fail if Atmos isn't found, which is what we want
     await guardAtmosInstalled();
+    core.info("after guard");
 
     // Create listeners to receive output (in memory) as well
     const stdout = new OutputListener();
@@ -60,4 +61,3 @@ const guardAtmosInstalled = async () => {
     core.setFailed(err);
   }
 })();
-
