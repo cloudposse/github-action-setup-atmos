@@ -47,7 +47,7 @@ jobs:
           which node
           echo $ATMOS_CLI_PATH
           atmos-bin version
-          node /home/runner/work/_temp/atmos version
+          atmos version
 
       - name: Verify outputs are available
         run: |
