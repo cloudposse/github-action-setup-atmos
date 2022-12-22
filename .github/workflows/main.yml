@@ -30,7 +30,7 @@ jobs:
           yarn build
           yarn build:wrapper
 
-      - uses: actions/setup-go
+      - uses: actions/setup-go@3
       - name: Integration Test
         uses: ./
         with:
