@@ -3962,16 +3962,16 @@ exports["default"] = _default;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getAtmosWrappedPath = exports.getAtmosBinaryName = exports.getAtmosWrappedBinaryName = void 0;
+exports.getAtmosWrappedPath = exports.getAtmosWrappedBinaryName = exports.getAtmosBinaryName = void 0;
 const path_1 = __nccwpck_require__(17);
 const system_1 = __nccwpck_require__(300);
-const getAtmosWrappedBinaryName = () => (0, exports.getAtmosBinaryName)(true);
-exports.getAtmosWrappedBinaryName = getAtmosWrappedBinaryName;
 const getAtmosBinaryName = (wrapped = false) => {
     const baseName = wrapped ? "atmos-bin" : "atmos";
     return (0, system_1.isWindows)() ? `${baseName}.exe` : `${baseName}`;
 };
 exports.getAtmosBinaryName = getAtmosBinaryName;
+const getAtmosWrappedBinaryName = () => (0, exports.getAtmosBinaryName)(true);
+exports.getAtmosWrappedBinaryName = getAtmosWrappedBinaryName;
 const getAtmosWrappedPath = () => [process.env.ATMOS_CLI_PATH, (0, exports.getAtmosWrappedBinaryName)()].join(path_1.sep);
 exports.getAtmosWrappedPath = getAtmosWrappedPath;
 
@@ -4019,7 +4019,7 @@ exports.OutputListener = OutputListener;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getArch = exports.getPlatform = exports.isWindows = void 0;
 const os_1 = __nccwpck_require__(37);
-const isWindowsPlatform = (platform) => platform.indexOf("win") >= 0;
+const isWindowsPlatform = (platform) => platform.startsWith("win");
 const normalizePlatform = (platform) => {
     // want 'darwin', 'freebsd', 'linux', 'windows'
     return isWindowsPlatform(platform) ? "windows" : platform;

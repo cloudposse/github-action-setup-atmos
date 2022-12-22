@@ -26234,16 +26234,16 @@ try {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getAtmosWrappedPath = exports.getAtmosBinaryName = exports.getAtmosWrappedBinaryName = void 0;
+exports.getAtmosWrappedPath = exports.getAtmosWrappedBinaryName = exports.getAtmosBinaryName = void 0;
 const path_1 = __nccwpck_require__(1017);
 const system_1 = __nccwpck_require__(5632);
-const getAtmosWrappedBinaryName = () => (0, exports.getAtmosBinaryName)(true);
-exports.getAtmosWrappedBinaryName = getAtmosWrappedBinaryName;
 const getAtmosBinaryName = (wrapped = false) => {
     const baseName = wrapped ? "atmos-bin" : "atmos";
     return (0, system_1.isWindows)() ? `${baseName}.exe` : `${baseName}`;
 };
 exports.getAtmosBinaryName = getAtmosBinaryName;
+const getAtmosWrappedBinaryName = () => (0, exports.getAtmosBinaryName)(true);
+exports.getAtmosWrappedBinaryName = getAtmosWrappedBinaryName;
 const getAtmosWrappedPath = () => [process.env.ATMOS_CLI_PATH, (0, exports.getAtmosWrappedBinaryName)()].join(path_1.sep);
 exports.getAtmosWrappedPath = getAtmosWrappedPath;
 
@@ -26423,6 +26423,7 @@ const installWrapperBin = (atmosDownloadPath) => __awaiter(void 0, void 0, void 
         destination = [atmosDownloadPath, "atmos"].join(path.sep);
         core.info(`Installing wrapper script from ${source} to ${destination}.`);
         yield io.cp(source, destination);
+        fs_1.default.chmodSync(destination, 755);
         // Export a new environment variable, so our wrapper can locate the binary
         core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
         return atmosDownloadPath;
@@ -26563,7 +26564,7 @@ exports.run = run;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getArch = exports.getPlatform = exports.isWindows = void 0;
 const os_1 = __nccwpck_require__(2037);
-const isWindowsPlatform = (platform) => platform.indexOf("win") >= 0;
+const isWindowsPlatform = (platform) => platform.startsWith("win");
 const normalizePlatform = (platform) => {
     // want 'darwin', 'freebsd', 'linux', 'windows'
     return isWindowsPlatform(platform) ? "windows" : platform;

@@ -1,6 +1,6 @@
 import { platform } from "os";
 
-const isWindowsPlatform = (platform: string) => platform.indexOf("win") >= 0;
+const isWindowsPlatform = (platform: string) => platform.startsWith("win");
 
 const normalizePlatform = (platform: string): string => {
   // want 'darwin', 'freebsd', 'linux', 'windows'
