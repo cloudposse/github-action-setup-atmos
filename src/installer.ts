@@ -164,18 +164,19 @@ export const installWrapperBin = async (
     source = path.resolve(
       [__dirname, "..", "dist", "wrapper", "index.js"].join(path.sep)
     );
-    //destination = [atmosDownloadPath, "atmos"].join(path.sep);
+    const destinationDir = [atmosDownloadPath, "atmosbin"].join(path.sep);
+    const destinationFile = [destinationDir, "atmos"].join(path.sep);
 
-    //core.info(`Installing wrapper script from ${source} to ${destination}.`);
-    //await io.cp(source, destination);
+    core.info(`Installing wrapper script from ${source} to ${destination}.`);
+    await io.cp(source, destinationFile);
 
-    core.info("Adding atmos wrapper to the tool cache...");
-    const toolPath = tc.cacheFile(source, "atmos", "atmos", version, arch);
+    //core.info("Adding atmos wrapper to the tool cache...");
+    //const toolPath = tc.cacheFile(source, "atmos", "atmos", version, arch);
 
     // Export a new environment variable, so our wrapper can locate the binary
-    core.exportVariable("ATMOS_CLI_PATH", toolPath);
+    core.exportVariable("ATMOS_CLI_PATH", destinationDir);
 
-    return toolPath;
+    return destinationDir;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     core.setFailed(`Unable to copy ${source} to ${destination}.`);
