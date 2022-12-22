@@ -37,7 +37,7 @@ jobs:
           install-wrapper: true
 
       - if: always()
-        run: ls -R
+        run: ls -R /home/runner/work
 
       - run: atmos version
 
