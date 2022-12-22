@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S NODE_NO_WARNINGS=1 node
+
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
 import * as io from "@actions/io";
@@ -61,3 +62,4 @@ const guardAtmosInstalled = async () => {
     core.setFailed(err);
   }
 })();
+
