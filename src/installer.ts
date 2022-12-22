@@ -178,8 +178,8 @@ export const installWrapperBin = async (
     return toolPath;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
-    core.error(`Unable to copy ${source} to ${destination}.`);
-    throw e;
+    core.setFailed(`Unable to copy ${source} to ${destination}.`);
+    return "";
   }
 };
 
@@ -204,7 +204,7 @@ export const installAtmosVersion = async (
     : getAtmosBinaryName();
   const destination = [toolDir, atmosBinName].join(path.sep);
 
-  fs.renameSync(downloadPath, destination);
+  await io.mv(downloadPath, destination);
   core.info(
     `Successfully renamed atmos from ${downloadPath} to ${destination}`
   );
