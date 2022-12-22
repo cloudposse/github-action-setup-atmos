@@ -197,6 +197,7 @@ export const installAtmosVersion = async (
   const resolvedVersion = makeSemver(info.resolvedVersion);
   const downloadPath = await tc.downloadTool(info.downloadUrl, undefined, auth);
   const toolPath = path.join(path.dirname(downloadPath), atmosBinName);
+  const toolDir = path.dirname(toolPath);
 
   core.info("Renaming Atmos...");
   await io.mv(downloadPath, toolPath);
@@ -205,7 +206,7 @@ export const installAtmosVersion = async (
   fs.chmodSync(toolPath, 755);
 
   if (installWrapper) {
-    await installWrapperBin(downloadPath, resolvedVersion, arch);
+    await installWrapperBin(toolDir, resolvedVersion, arch);
   }
 
   core.info("Adding atmos to the tool cache ...");
@@ -217,7 +218,7 @@ export const installAtmosVersion = async (
   // );
 
   //core.info(`Successfully cached atmos to ${cachedDir}`);
-  return path.dirname(toolPath);
+  return toolDir;
 };
 
 export const getAtmos = async (
