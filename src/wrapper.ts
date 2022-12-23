@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
 import * as io from "@actions/io";
