@@ -1,5 +1,3 @@
-#!/usr/bin/env -S NODE_NO_WARNINGS=1 node
-
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -3957,190 +3955,6 @@ exports["default"] = _default;
 
 /***/ }),
 
-/***/ 853:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getAtmosWrappedPath = exports.getAtmosWrappedBinaryName = exports.getAtmosBinaryName = void 0;
-const path_1 = __nccwpck_require__(17);
-const system_1 = __nccwpck_require__(300);
-const getAtmosBinaryName = (wrapped = false) => {
-    const baseName = wrapped ? "atmos-bin" : "atmos";
-    return (0, system_1.isWindows)() ? `${baseName}.exe` : `${baseName}`;
-};
-exports.getAtmosBinaryName = getAtmosBinaryName;
-const getAtmosWrappedBinaryName = () => (0, exports.getAtmosBinaryName)(true);
-exports.getAtmosWrappedBinaryName = getAtmosWrappedBinaryName;
-const getAtmosWrappedPath = () => [process.env.ATMOS_CLI_PATH, (0, exports.getAtmosWrappedBinaryName)()].join(path_1.sep);
-exports.getAtmosWrappedPath = getAtmosWrappedPath;
-
-
-/***/ }),
-
-/***/ 149:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.OutputListener = void 0;
-/**
- * Acts as a listener for @actions/exec, by capturing STDOUT and STDERR streams, and exposes them via the contents
- * property.
- */
-class OutputListener {
-    constructor() {
-        this._buff = [];
-    }
-    get listener() {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const classThis = this;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const listen = function listen(data) {
-            classThis._buff.push(data);
-        };
-        return listen.bind(this);
-    }
-    get contents() {
-        return this._buff.map((chunk) => chunk.toString()).join("");
-    }
-}
-exports.OutputListener = OutputListener;
-
-
-/***/ }),
-
-/***/ 300:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getArch = exports.getPlatform = exports.isWindows = void 0;
-const os_1 = __nccwpck_require__(37);
-const isWindowsPlatform = (platform) => platform.startsWith("win");
-const normalizePlatform = (platform) => {
-    // want 'darwin', 'freebsd', 'linux', 'windows'
-    return isWindowsPlatform(platform) ? "windows" : platform;
-};
-const isWindows = () => isWindowsPlatform((0, os_1.platform)());
-exports.isWindows = isWindows;
-const getPlatform = () => normalizePlatform((0, os_1.platform)());
-exports.getPlatform = getPlatform;
-const getArch = (arch) => {
-    // 'arm', 'arm64', 'ia32', 'mips', 'mipsel', 'ppc', 'ppc64', 's390', 's390x', 'x32', and 'x64'.
-    switch (arch) {
-        case "x64":
-            return "amd64";
-        case "x32":
-            return "386";
-        case "arm":
-            return "armv6l";
-    }
-    return arch;
-};
-exports.getArch = getArch;
-
-
-/***/ }),
-
-/***/ 94:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(186));
-const exec_1 = __nccwpck_require__(514);
-const io = __importStar(__nccwpck_require__(436));
-const atmos_bin_1 = __nccwpck_require__(853);
-const output_listener_1 = __nccwpck_require__(149);
-const pathToCLI = (0, atmos_bin_1.getAtmosWrappedPath)();
-const guardAtmosInstalled = () => __awaiter(void 0, void 0, void 0, function* () {
-    // Setting check to `true` will cause `which` to throw if atmos isn't found
-    const check = true;
-    return io.which(pathToCLI, check);
-});
-(() => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        core.info("path: " + pathToCLI);
-        // This will fail if Atmos isn't found, which is what we want
-        yield guardAtmosInstalled();
-        core.info("after guard");
-        // Create listeners to receive output (in memory) as well
-        const stdout = new output_listener_1.OutputListener();
-        const stderr = new output_listener_1.OutputListener();
-        const listeners = {
-            stdout: stdout.listener,
-            stderr: stderr.listener,
-        };
-        // Execute atmos and capture output
-        const args = process.argv.slice(2);
-        const options = {
-            listeners,
-            ignoreReturnCode: true,
-        };
-        const exitCode = yield (0, exec_1.exec)(pathToCLI, args, options);
-        core.debug(`atmos exited with code ${exitCode}.`);
-        core.debug(`stdout: ${stdout.contents}`);
-        core.debug(`stderr: ${stderr.contents}`);
-        core.debug(`exitcode: ${exitCode}`);
-        // Set outputs, result, exitcode, and stderr
-        core.setOutput("stdout", stdout.contents);
-        core.setOutput("stderr", stderr.contents);
-        core.setOutput("exitcode", exitCode.toString(10));
-        if (exitCode === 0 || exitCode === 2) {
-            // A exitCode of 0 is considered a success
-            // An exitCode of 2 may be returned when the '-detailed-exitcode' option is passed to terraform plan. This denotes
-            // Success with non-empty diff (changes present).
-            return;
-        }
-        // A non-zero exitCode is considered an error
-        core.setFailed(`Atmos exited with code ${exitCode}.`);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }
-    catch (err) {
-        core.setFailed(err);
-    }
-}))();
-
-
-/***/ }),
-
 /***/ 491:
 /***/ ((module) => {
 
@@ -4286,17 +4100,150 @@ module.exports = require("util");
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(94);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+// ESM COMPAT FLAG
+__nccwpck_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(186);
+// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
+var exec = __nccwpck_require__(514);
+// EXTERNAL MODULE: ./node_modules/@actions/io/lib/io.js
+var io = __nccwpck_require__(436);
+// EXTERNAL MODULE: external "path"
+var external_path_ = __nccwpck_require__(17);
+// EXTERNAL MODULE: external "os"
+var external_os_ = __nccwpck_require__(37);
+;// CONCATENATED MODULE: ./src/system.ts
+
+const isWindowsPlatform = (platform) => platform.startsWith("win");
+const normalizePlatform = (platform) => {
+    // want 'darwin', 'freebsd', 'linux', 'windows'
+    return isWindowsPlatform(platform) ? "windows" : platform;
+};
+const isWindows = () => isWindowsPlatform((0,external_os_.platform)());
+const getPlatform = () => normalizePlatform(platform());
+const getArch = (arch) => {
+    // 'arm', 'arm64', 'ia32', 'mips', 'mipsel', 'ppc', 'ppc64', 's390', 's390x', 'x32', and 'x64'.
+    switch (arch) {
+        case "x64":
+            return "amd64";
+        case "x32":
+            return "386";
+        case "arm":
+            return "armv6l";
+    }
+    return arch;
+};
+
+;// CONCATENATED MODULE: ./src/atmos-bin.ts
+
+
+const getAtmosBinaryName = (wrapped = false) => {
+    const baseName = wrapped ? "atmos-bin" : "atmos";
+    return isWindows() ? `${baseName}.exe` : `${baseName}`;
+};
+const getAtmosWrappedBinaryName = () => getAtmosBinaryName(true);
+const getAtmosWrappedPath = () => [process.env.ATMOS_CLI_PATH, getAtmosWrappedBinaryName()].join(external_path_.sep);
+
+;// CONCATENATED MODULE: ./src/output-listener.ts
+/**
+ * Acts as a listener for @actions/exec, by capturing STDOUT and STDERR streams, and exposes them via the contents
+ * property.
+ */
+class OutputListener {
+    constructor() {
+        this._buff = [];
+    }
+    get listener() {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const classThis = this;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const listen = function listen(data) {
+            classThis._buff.push(data);
+        };
+        return listen.bind(this);
+    }
+    get contents() {
+        return this._buff.map((chunk) => chunk.toString()).join("");
+    }
+}
+
+;// CONCATENATED MODULE: ./src/wrapper.ts
+
+
+
+
+
+const pathToCLI = getAtmosWrappedPath();
+const guardAtmosInstalled = async () => {
+    // Setting check to `true` will cause `which` to throw if atmos isn't found
+    return io.which(pathToCLI, true);
+};
+(async () => {
+    try {
+        core.info("path: " + pathToCLI);
+        // This will fail if Atmos isn't found, which is what we want
+        await guardAtmosInstalled();
+        core.info("after guard");
+        // Create listeners to receive output (in memory) as well
+        const stdout = new OutputListener();
+        const stderr = new OutputListener();
+        const listeners = {
+            stdout: stdout.listener,
+            stderr: stderr.listener,
+        };
+        // Execute atmos and capture output
+        const args = process.argv.slice(2);
+        const options = {
+            listeners,
+            ignoreReturnCode: true,
+        };
+        const exitCode = await (0,exec.exec)(pathToCLI, args, options);
+        core.debug(`atmos exited with code ${exitCode}.`);
+        core.debug(`stdout: ${stdout.contents}`);
+        core.debug(`stderr: ${stderr.contents}`);
+        core.debug(`exitcode: ${exitCode}`);
+        // Set outputs, result, exitcode, and stderr
+        core.setOutput("stdout", stdout.contents);
+        core.setOutput("stderr", stderr.contents);
+        core.setOutput("exitcode", exitCode.toString(10));
+        if (exitCode === 0 || exitCode === 2) {
+            // A exitCode of 0 is considered a success
+            // An exitCode of 2 may be returned when the '-detailed-exitcode' option is passed to terraform plan. This denotes
+            // Success with non-empty diff (changes present).
+            return;
+        }
+        // A non-zero exitCode is considered an error
+        core.setFailed(`Atmos exited with code ${exitCode}.`);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }
+    catch (err) {
+        core.setFailed(err);
+    }
+})();
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;

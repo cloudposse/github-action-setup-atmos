@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2015",
+    "target": "ES2021",
     "moduleResolution": "node",
-    "module": "commonjs",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
