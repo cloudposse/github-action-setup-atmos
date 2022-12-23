@@ -20,8 +20,8 @@ jobs:
           node-version-file: package.json
           cache: yarn
 
-      # - name: Install Dependencies
-      #   run: yarn --frozen-lockfile --prefer-offline
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile --prefer-offline
 
       # - name: Linting
       #   run: yarn lint
