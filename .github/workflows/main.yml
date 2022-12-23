@@ -36,7 +36,7 @@ jobs:
         run: |
           yarn build
           yarn build:wrapper
-          printf '%s\n%s\n' "#!/usr/bin/env -S NODE_NO_WARNINGS=1 node\n" "$(cat dist/wrapper/index.js)" >dist/wrapper/index.js
+          printf '%s\n%s\n\n' "#!/usr/bin/env -S NODE_NO_WARNINGS=1 node" "$(cat dist/wrapper/index.js)" >dist/wrapper/index.js
 
       - name: Integration Test
         uses: ./
