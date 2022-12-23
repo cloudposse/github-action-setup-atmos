@@ -2,10 +2,6 @@ on:
   workflow_dispatch:
   pull_request:
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   build:
     runs-on: ubuntu-latest
