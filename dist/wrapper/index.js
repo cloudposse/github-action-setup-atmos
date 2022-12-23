@@ -1,4 +1,4 @@
-#!/usr/bin/env -S NODE_NO_WARNINGS=1 node\n
+#!/usr/bin/env -S NODE_NO_WARNINGS=1 node
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -4299,3 +4299,4 @@ module.exports = require("util");
 /******/ 	
 /******/ })()
 ;
+
