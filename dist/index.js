@@ -24227,10 +24227,10 @@ const installWrapperBin = async (atmosDownloadPath) => {
     let source = "";
     let destination = "";
     try {
-        source = external_path_.resolve([__dirname, "..", "dist", "wrapper", "index.js"].join(external_path_.sep));
+        source = __nccwpck_require__.ab + "index1.js";
         destination = [atmosDownloadPath, "atmos"].join(external_path_.sep);
         core.info(`Installing wrapper script from ${source} to ${destination}.`);
-        await io.cp(source, destination);
+        await io.cp(__nccwpck_require__.ab + "index1.js", destination);
         external_fs_default().chmodSync(destination, 755);
         // Export a new environment variable, so our wrapper can locate the binary
         core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
