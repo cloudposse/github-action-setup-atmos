@@ -1,4 +1,4 @@
-#!/usr/bin/env -S NODE_NO_WARNINGS=1 node
+#!/usr/bin/env node
 
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
