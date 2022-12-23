@@ -43,9 +43,9 @@ jobs:
           atmos-version: latest
           install-wrapper: true
 
-      - run: |
-          chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos
-          chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos-bin
+      # - run: |
+      #     chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos
+      #     chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos-bin
 
       - name: atmos
         id: atmos
