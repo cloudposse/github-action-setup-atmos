@@ -18374,9 +18374,10 @@ exports.FetchError = FetchError;
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
+var __webpack_unused_export__;
 
 
-Object.defineProperty(exports, "__esModule", ({ value: true }));
+__webpack_unused_export__ = ({ value: true });
 
 var core = __nccwpck_require__(6762);
 var pluginPaginateRest = __nccwpck_require__(4193);
@@ -18421,15 +18422,15 @@ const OAuthApp = oauthApp.OAuthApp.defaults({
   Octokit
 });
 
-Object.defineProperty(exports, "createNodeMiddleware", ({
+__webpack_unused_export__ = ({
     enumerable: true,
     get: function () {
         return app.createNodeMiddleware;
     }
-}));
-exports.App = App;
-exports.OAuthApp = OAuthApp;
-exports.Octokit = Octokit;
+});
+__webpack_unused_export__ = App;
+__webpack_unused_export__ = OAuthApp;
+exports.vd = Octokit;
 //# sourceMappingURL=index.js.map
 
 
@@ -23818,376 +23819,6 @@ try {
 
 /***/ }),
 
-/***/ 3853:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getAtmosWrappedPath = exports.getAtmosWrappedBinaryName = exports.getAtmosBinaryName = void 0;
-const path_1 = __nccwpck_require__(1017);
-const system_1 = __nccwpck_require__(5632);
-const getAtmosBinaryName = (wrapped = false) => {
-    const baseName = wrapped ? "atmos-bin" : "atmos";
-    return (0, system_1.isWindows)() ? `${baseName}.exe` : `${baseName}`;
-};
-exports.getAtmosBinaryName = getAtmosBinaryName;
-const getAtmosWrappedBinaryName = () => (0, exports.getAtmosBinaryName)(true);
-exports.getAtmosWrappedBinaryName = getAtmosWrappedBinaryName;
-const getAtmosWrappedPath = () => [process.env.ATMOS_CLI_PATH, (0, exports.getAtmosWrappedBinaryName)()].join(path_1.sep);
-exports.getAtmosWrappedPath = getAtmosWrappedPath;
-
-
-/***/ }),
-
-/***/ 2574:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __asyncValues = (this && this.__asyncValues) || function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getAtmos = exports.installAtmosVersion = exports.installWrapperBin = exports.getMatchingVersion = exports.getVersionsFromGitHubReleases = exports.findVersionMatch = exports.makeSemver = void 0;
-const fs_1 = __importDefault(__nccwpck_require__(7147));
-const os_1 = __importDefault(__nccwpck_require__(2037));
-const path = __importStar(__nccwpck_require__(1017));
-const core = __importStar(__nccwpck_require__(2186));
-const io = __importStar(__nccwpck_require__(7436));
-const tc = __importStar(__nccwpck_require__(7784));
-const octokit_1 = __nccwpck_require__(7467);
-const semver = __importStar(__nccwpck_require__(5911));
-const atmos_bin_1 = __nccwpck_require__(3853);
-const sys = __importStar(__nccwpck_require__(5632));
-//
-// Convert version syntax into semver for semver matching
-// 1.13.1 => 1.13.1
-// 1.13 => 1.13.0
-// 1.10beta1 => 1.10.0-beta.1, 1.10rc1 => 1.10.0-rc.1
-// 1.8.5beta1 => 1.8.5-beta.1, 1.8.5rc1 => 1.8.5-rc.1
-const makeSemver = (version) => {
-    var _a;
-    version = version.replace("beta", "-beta.").replace("rc", "-rc.");
-    const parts = version.split("-");
-    const semVersion = (_a = semver.coerce(parts[0])) === null || _a === void 0 ? void 0 : _a.version;
-    if (!semVersion) {
-        throw new Error(`The version: ${version} can't be changed to SemVer notation`);
-    }
-    if (!parts[1]) {
-        return semVersion;
-    }
-    const fullVersion = semver.valid(`${semVersion}-${parts[1]}`);
-    if (!fullVersion) {
-        throw new Error(`The version: ${version} can't be changed to SemVer notation`);
-    }
-    return fullVersion;
-};
-exports.makeSemver = makeSemver;
-const findVersionMatch = (versionSpec, arch = os_1.default.arch(), candidates) => {
-    const archFilter = sys.getArch(arch);
-    const platFilter = sys.getPlatform();
-    let result;
-    let match;
-    if (!candidates) {
-        throw new Error(`atmos download url did not return results`);
-    }
-    let atmosFile;
-    for (let i = 0; i < candidates.length; i++) {
-        const candidate = candidates[i];
-        const version = (0, exports.makeSemver)(candidate.name);
-        core.debug(`check ${version} satisfies ${versionSpec}`);
-        if (semver.satisfies(version, versionSpec) || versionSpec == "latest") {
-            atmosFile = candidate.assets.find((file) => {
-                core.debug(`${file.arch}===${archFilter} && ${file.os}===${platFilter}`);
-                return file.arch === archFilter && file.os === platFilter;
-            });
-            if (atmosFile) {
-                core.debug(`matched ${candidate.name}`);
-                match = candidate;
-                break;
-            }
-        }
-    }
-    if (match && atmosFile) {
-        result = Object.assign({}, match);
-        result.assets = [atmosFile];
-    }
-    return result;
-};
-exports.findVersionMatch = findVersionMatch;
-const getVersionsFromGitHubReleases = (auth) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, e_1, _b, _c;
-    const octokit = new octokit_1.Octokit({ auth });
-    const versions = [];
-    try {
-        for (var _d = true, _e = __asyncValues(octokit.paginate.iterator(octokit.rest.repos.listReleases, {
-            owner: "cloudposse",
-            repo: "atmos",
-        })), _f; _f = yield _e.next(), _a = _f.done, !_a;) {
-            _c = _f.value;
-            _d = false;
-            try {
-                const release = _c;
-                release.data.forEach((r) => {
-                    const { tag_name, prerelease } = r;
-                    if (!tag_name) {
-                        throw new Error(`Release tag is empty`);
-                    }
-                    const assets = r.assets.map((asset) => {
-                        const { name, browser_download_url } = asset;
-                        const parts = asset.name.split("_");
-                        const os = parts[2];
-                        const arch = parts[3];
-                        return { name, os, arch, browser_download_url };
-                    });
-                    const version = { name: tag_name, prerelease, assets };
-                    versions.push(version);
-                });
-            }
-            finally {
-                _d = true;
-            }
-        }
-    }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-    finally {
-        try {
-            if (!_d && !_a && (_b = _e.return)) yield _b.call(_e);
-        }
-        finally { if (e_1) throw e_1.error; }
-    }
-    return versions;
-});
-exports.getVersionsFromGitHubReleases = getVersionsFromGitHubReleases;
-const getMatchingVersion = (versionSpec, auth, arch) => __awaiter(void 0, void 0, void 0, function* () {
-    const candidates = yield (0, exports.getVersionsFromGitHubReleases)(auth);
-    const version = (0, exports.findVersionMatch)(versionSpec, arch, candidates);
-    if (!version) {
-        return null;
-    }
-    return {
-        downloadUrl: version.assets[0].browser_download_url,
-        resolvedVersion: version.name,
-        fileName: version.assets[0].name,
-    };
-});
-exports.getMatchingVersion = getMatchingVersion;
-const installWrapperBin = (atmosDownloadPath) => __awaiter(void 0, void 0, void 0, function* () {
-    let source = "";
-    let destination = "";
-    try {
-        source = path.resolve([__dirname, "..", "dist", "wrapper", "index.js"].join(path.sep));
-        destination = [atmosDownloadPath, "atmos"].join(path.sep);
-        core.info(`Installing wrapper script from ${source} to ${destination}.`);
-        yield io.cp(source, destination);
-        fs_1.default.chmodSync(destination, 0o775);
-        // Export a new environment variable, so our wrapper can locate the binary
-        core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
-        return atmosDownloadPath;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }
-    catch (e) {
-        core.setFailed(`Unable to copy ${source} to ${destination}.`);
-        throw e;
-    }
-});
-exports.installWrapperBin = installWrapperBin;
-const installAtmosVersion = (info, auth, arch, installWrapper) => __awaiter(void 0, void 0, void 0, function* () {
-    const atmosBinName = installWrapper
-        ? (0, atmos_bin_1.getAtmosWrappedBinaryName)()
-        : (0, atmos_bin_1.getAtmosBinaryName)();
-    const homeDir = path.resolve([__dirname, "..", ".."].join(path.sep));
-    const atmosInstallPath = [homeDir, "atmos"].join(path.sep);
-    core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
-    const downloadPath = yield tc.downloadTool(info.downloadUrl, undefined, auth);
-    const toolPath = path.join(atmosInstallPath, atmosBinName);
-    core.info("Renaming downloaded file...");
-    yield io.mv(downloadPath, toolPath);
-    core.info(`Successfully renamed atmos from ${downloadPath} to ${toolPath}`);
-    fs_1.default.chmodSync(toolPath, 0o775);
-    if (installWrapper) {
-        yield (0, exports.installWrapperBin)(atmosInstallPath);
-    }
-    core.info(`Successfully installed atmos to ${atmosInstallPath}`);
-    return atmosInstallPath;
-});
-exports.installAtmosVersion = installAtmosVersion;
-const getAtmos = (versionSpec, auth, arch = os_1.default.arch(), installWrapper) => __awaiter(void 0, void 0, void 0, function* () {
-    const osPlat = os_1.default.platform();
-    // check cache
-    let toolPath;
-    toolPath = tc.find("atmos", versionSpec, arch);
-    // If not found in cache, download
-    if (toolPath) {
-        core.info(`Found in cache @ ${toolPath}`);
-        return { toolPath, info: null };
-    }
-    core.info(`Attempting to download ${versionSpec}...`);
-    let info = null;
-    info = yield (0, exports.getMatchingVersion)(versionSpec, auth, arch);
-    if (!info) {
-        throw new Error(`Unable to find Atmos version '${versionSpec}' for platform ${osPlat} and architecture ${arch}.`);
-    }
-    try {
-        core.info(`Installing version ${info.resolvedVersion} from GitHub`);
-        toolPath = yield (0, exports.installAtmosVersion)(info, undefined, arch, installWrapper);
-        if (osPlat != "win32") {
-            toolPath = path.join(toolPath);
-        }
-        core.addPath(toolPath);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }
-    catch (err) {
-        core.setFailed(err);
-    }
-    return { toolPath, info };
-});
-exports.getAtmos = getAtmos;
-
-
-/***/ }),
-
-/***/ 399:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = void 0;
-const os_1 = __importDefault(__nccwpck_require__(2037));
-const core = __importStar(__nccwpck_require__(2186));
-const installer = __importStar(__nccwpck_require__(2574));
-const run = () => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const versionSpec = core.getInput("atmos-version");
-        core.info(`Setup atmos version spec ${versionSpec}`);
-        const arch = core.getInput("architecture") || os_1.default.arch();
-        const installWrapper = core.getInput("install-wrapper") === "true";
-        const token = core.getInput("token");
-        const auth = !token ? undefined : `token ${token}`;
-        const { toolPath, info } = yield installer.getAtmos(versionSpec, auth, arch, installWrapper);
-        core.info(`Successfully set up Atmos version ${versionSpec} in ${toolPath}`);
-        core.setOutput("atmos-version", info === null || info === void 0 ? void 0 : info.resolvedVersion);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }
-    catch (error) {
-        core.error(error);
-    }
-});
-exports.run = run;
-
-
-/***/ }),
-
-/***/ 5632:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getArch = exports.getPlatform = exports.isWindows = void 0;
-const os_1 = __nccwpck_require__(2037);
-const isWindowsPlatform = (platform) => platform.startsWith("win");
-const normalizePlatform = (platform) => {
-    // want 'darwin', 'freebsd', 'linux', 'windows'
-    return isWindowsPlatform(platform) ? "windows" : platform;
-};
-const isWindows = () => isWindowsPlatform((0, os_1.platform)());
-exports.isWindows = isWindows;
-const getPlatform = () => normalizePlatform((0, os_1.platform)());
-exports.getPlatform = getPlatform;
-const getArch = (arch) => {
-    // 'arm', 'arm64', 'ia32', 'mips', 'mipsel', 'ppc', 'ppc64', 's390', 's390x', 'x32', and 'x64'.
-    switch (arch) {
-        case "x64":
-            return "amd64";
-        case "x32":
-            return "386";
-        case "arm":
-            return "armv6l";
-    }
-    return arch;
-};
-exports.getArch = getArch;
-
-
-/***/ }),
-
 /***/ 2877:
 /***/ ((module) => {
 
@@ -24389,6 +24020,46 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__nccwpck_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__nccwpck_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
@@ -24398,11 +24069,259 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
 "use strict";
-var exports = __webpack_exports__;
+// ESM COMPAT FLAG
+__nccwpck_require__.r(__webpack_exports__);
 
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const main_1 = __nccwpck_require__(399);
-(0, main_1.run)();
+// EXTERNAL MODULE: external "os"
+var external_os_ = __nccwpck_require__(2037);
+var external_os_default = /*#__PURE__*/__nccwpck_require__.n(external_os_);
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(2186);
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __nccwpck_require__(7147);
+var external_fs_default = /*#__PURE__*/__nccwpck_require__.n(external_fs_);
+// EXTERNAL MODULE: external "path"
+var external_path_ = __nccwpck_require__(1017);
+// EXTERNAL MODULE: ./node_modules/@actions/io/lib/io.js
+var io = __nccwpck_require__(7436);
+// EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
+var tool_cache = __nccwpck_require__(7784);
+// EXTERNAL MODULE: ./node_modules/octokit/dist-node/index.js
+var dist_node = __nccwpck_require__(7467);
+// EXTERNAL MODULE: ./node_modules/semver/semver.js
+var semver = __nccwpck_require__(5911);
+;// CONCATENATED MODULE: ./src/system.ts
+
+const isWindowsPlatform = (platform) => platform.startsWith("win");
+const normalizePlatform = (platform) => {
+    // want 'darwin', 'freebsd', 'linux', 'windows'
+    return isWindowsPlatform(platform) ? "windows" : platform;
+};
+const isWindows = () => isWindowsPlatform((0,external_os_.platform)());
+const getPlatform = () => normalizePlatform((0,external_os_.platform)());
+const getArch = (arch) => {
+    // 'arm', 'arm64', 'ia32', 'mips', 'mipsel', 'ppc', 'ppc64', 's390', 's390x', 'x32', and 'x64'.
+    switch (arch) {
+        case "x64":
+            return "amd64";
+        case "x32":
+            return "386";
+        case "arm":
+            return "armv6l";
+    }
+    return arch;
+};
+
+;// CONCATENATED MODULE: ./src/atmos-bin.ts
+
+
+const getAtmosBinaryName = (wrapped = false) => {
+    const baseName = wrapped ? "atmos-bin" : "atmos";
+    return isWindows() ? `${baseName}.exe` : `${baseName}`;
+};
+const getAtmosWrappedBinaryName = () => getAtmosBinaryName(true);
+const getAtmosWrappedPath = () => [process.env.ATMOS_CLI_PATH, getAtmosWrappedBinaryName()].join(sep);
+
+;// CONCATENATED MODULE: ./src/installer.ts
+
+
+
+
+
+
+
+
+
+
+//
+// Convert version syntax into semver for semver matching
+// 1.13.1 => 1.13.1
+// 1.13 => 1.13.0
+// 1.10beta1 => 1.10.0-beta.1, 1.10rc1 => 1.10.0-rc.1
+// 1.8.5beta1 => 1.8.5-beta.1, 1.8.5rc1 => 1.8.5-rc.1
+const makeSemver = (version) => {
+    version = version.replace("beta", "-beta.").replace("rc", "-rc.");
+    const parts = version.split("-");
+    const semVersion = semver.coerce(parts[0])?.version;
+    if (!semVersion) {
+        throw new Error(`The version: ${version} can't be changed to SemVer notation`);
+    }
+    if (!parts[1]) {
+        return semVersion;
+    }
+    const fullVersion = semver.valid(`${semVersion}-${parts[1]}`);
+    if (!fullVersion) {
+        throw new Error(`The version: ${version} can't be changed to SemVer notation`);
+    }
+    return fullVersion;
+};
+const findVersionMatch = (versionSpec, arch = external_os_default().arch(), candidates) => {
+    const archFilter = getArch(arch);
+    const platFilter = getPlatform();
+    let result;
+    let match;
+    if (!candidates) {
+        throw new Error(`atmos download url did not return results`);
+    }
+    let atmosFile;
+    for (let i = 0; i < candidates.length; i++) {
+        const candidate = candidates[i];
+        const version = makeSemver(candidate.name);
+        core.debug(`check ${version} satisfies ${versionSpec}`);
+        if (semver.satisfies(version, versionSpec) || versionSpec == "latest") {
+            atmosFile = candidate.assets.find((file) => {
+                core.debug(`${file.arch}===${archFilter} && ${file.os}===${platFilter}`);
+                return file.arch === archFilter && file.os === platFilter;
+            });
+            if (atmosFile) {
+                core.debug(`matched ${candidate.name}`);
+                match = candidate;
+                break;
+            }
+        }
+    }
+    if (match && atmosFile) {
+        result = Object.assign({}, match);
+        result.assets = [atmosFile];
+    }
+    return result;
+};
+const getVersionsFromGitHubReleases = async (auth) => {
+    const octokit = new dist_node/* Octokit */.vd({ auth });
+    const versions = [];
+    for await (const release of octokit.paginate.iterator(octokit.rest.repos.listReleases, {
+        owner: "cloudposse",
+        repo: "atmos",
+    })) {
+        release.data.forEach((r) => {
+            const { tag_name, prerelease } = r;
+            if (!tag_name) {
+                throw new Error(`Release tag is empty`);
+            }
+            const assets = r.assets.map((asset) => {
+                const { name, browser_download_url } = asset;
+                const parts = asset.name.split("_");
+                const os = parts[2];
+                const arch = parts[3];
+                return { name, os, arch, browser_download_url };
+            });
+            const version = { name: tag_name, prerelease, assets };
+            versions.push(version);
+        });
+    }
+    return versions;
+};
+const getMatchingVersion = async (versionSpec, auth, arch) => {
+    const candidates = await getVersionsFromGitHubReleases(auth);
+    const version = findVersionMatch(versionSpec, arch, candidates);
+    if (!version) {
+        return null;
+    }
+    return {
+        downloadUrl: version.assets[0].browser_download_url,
+        resolvedVersion: version.name,
+        fileName: version.assets[0].name,
+    };
+};
+const installWrapperBin = async (atmosDownloadPath) => {
+    let source = "";
+    let destination = "";
+    try {
+        source = external_path_.resolve([__dirname, "..", "dist", "wrapper", "index.js"].join(external_path_.sep));
+        destination = [atmosDownloadPath, "atmos"].join(external_path_.sep);
+        core.info(`Installing wrapper script from ${source} to ${destination}.`);
+        const orig = (0,external_fs_.readFileSync)(source, "utf8");
+        const contents = `#!/usr/bin/env node\n\n${orig}`;
+        //await io.cp(source, destination);
+        await (0,external_fs_.writeFileSync)(destination, contents, "utf8");
+        external_fs_default().chmodSync(destination, 0o775);
+        // This is a hack to fix the line ending of the shebang, which for some unknown reason is being written as CR
+        // rather than LF
+        // Export a new environment variable, so our wrapper can locate the binary
+        core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
+        return atmosDownloadPath;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }
+    catch (e) {
+        core.setFailed(`Unable to copy ${source} to ${destination}.`);
+        throw e;
+    }
+};
+const installAtmosVersion = async (info, auth, arch, installWrapper) => {
+    const atmosBinName = installWrapper
+        ? getAtmosWrappedBinaryName()
+        : getAtmosBinaryName();
+    const homeDir = external_path_.resolve([__dirname, "..", ".."].join(external_path_.sep));
+    const atmosInstallPath = [homeDir, "atmos"].join(external_path_.sep);
+    core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
+    const downloadPath = await tool_cache.downloadTool(info.downloadUrl, undefined, auth);
+    const toolPath = external_path_.join(atmosInstallPath, atmosBinName);
+    core.info("Renaming downloaded file...");
+    await io.mv(downloadPath, toolPath);
+    core.info(`Successfully renamed atmos from ${downloadPath} to ${toolPath}`);
+    external_fs_default().chmodSync(toolPath, 0o775);
+    if (installWrapper) {
+        await installWrapperBin(atmosInstallPath);
+    }
+    core.info(`Successfully installed atmos to ${atmosInstallPath}`);
+    return atmosInstallPath;
+};
+const getAtmos = async (versionSpec, auth, arch = external_os_default().arch(), installWrapper) => {
+    const osPlat = external_os_default().platform();
+    // check cache
+    let toolPath;
+    toolPath = tool_cache.find("atmos", versionSpec, arch);
+    // If not found in cache, download
+    if (toolPath) {
+        core.info(`Found in cache @ ${toolPath}`);
+        return { toolPath, info: null };
+    }
+    core.info(`Attempting to download ${versionSpec}...`);
+    let info = null;
+    info = await getMatchingVersion(versionSpec, auth, arch);
+    if (!info) {
+        throw new Error(`Unable to find Atmos version '${versionSpec}' for platform ${osPlat} and architecture ${arch}.`);
+    }
+    try {
+        core.info(`Installing version ${info.resolvedVersion} from GitHub`);
+        toolPath = await installAtmosVersion(info, undefined, arch, installWrapper);
+        if (osPlat != "win32") {
+            toolPath = external_path_.join(toolPath);
+        }
+        core.addPath(toolPath);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }
+    catch (err) {
+        core.setFailed(err);
+    }
+    return { toolPath, info };
+};
+
+;// CONCATENATED MODULE: ./src/main.ts
+
+
+
+const run = async () => {
+    try {
+        const versionSpec = core.getInput("atmos-version");
+        core.info(`Setup atmos version spec ${versionSpec}`);
+        const arch = core.getInput("architecture") || external_os_default().arch();
+        const installWrapper = core.getInput("install-wrapper") === "true";
+        const token = core.getInput("token");
+        const auth = !token ? undefined : `token ${token}`;
+        const { toolPath, info } = await getAtmos(versionSpec, auth, arch, installWrapper);
+        core.info(`Successfully set up Atmos version ${versionSpec} in ${toolPath}`);
+        core.setOutput("atmos-version", info?.resolvedVersion);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }
+    catch (error) {
+        core.error(error);
+    }
+};
+
+;// CONCATENATED MODULE: ./src/setup-atmos.ts
+
+run();
 
 })();
 
