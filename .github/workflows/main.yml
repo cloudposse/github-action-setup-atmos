@@ -45,16 +45,7 @@ jobs:
           install-wrapper: true
 
       - name: atmos
-        run: |
-          which atmos 
-          which atmos-bin
-          which node
-          echo $ATMOS_CLI_PATH
-          atmos-bin version
-          chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos
-          chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos-bin
-          ls -latr /home/runner/work/github-action-setup-atmos/atmos
-          atmos version
+        run: atmos version
 
       - name: Verify outputs are available
         run: |
