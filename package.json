@@ -1,22 +1,22 @@
 {
-  "name": "github-action-typescript-template",
+  "name": "github-action-setup-atmos",
   "version": "0.0.0",
   "private": true,
-  "description": "A template for creating a GitHub Action written in TypeScript",
+  "description": "A GitHub action to setup the atmos cli",
   "main": "dist/index.js",
   "scripts": {
+    "build": "ncc build src/setup-atmos.ts -C --license licenses.txt -o dist",
+    "build:wrapper": "ncc build src/wrapper.ts -m -C --license licenses.txt -o dist/wrapper",
+    "clean": "rimraf dist",
     "format": "prettier --write **/*.ts",
     "format:check": "prettier --check **/*.ts",
     "lint": "eslint --fix src/**/*.ts",
     "lint:check": "eslint src/**/*.ts",
-    "build": "ncc build src/setup-atmos.ts -C --license licenses.txt -o dist",
-    "build:wrapper": "ncc build src/wrapper.ts -m -C --license licenses.txt -o dist/wrapper",
-    "clean": "rimraf dist",
     "test": "jest"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nelsoncanarinho/typescript-action"
+    "url": "git+https://github.com/cloudposse/github-action-setup-atmos"
   },
   "keywords": [
     "actions",
@@ -62,3 +62,4 @@
     "yarn": "1.22.19"
   }
 }
+
