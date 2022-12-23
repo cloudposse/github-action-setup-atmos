@@ -56,6 +56,7 @@ jobs:
           echo "exitcode: ${{ steps.atmos.outputs.exitcode }}"
 
       - name: Commit and Push Changes
+        if: always()
         uses: EndBug/add-and-commit@v9
         with:
           committer_name: GitHub Action
