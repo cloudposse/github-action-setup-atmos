@@ -1,0 +1,29 @@
+name: "setup-atmos"
+description: "A GitHub Action to setup the Atmos CLI"
+author: hello@cloudposse.com
+branding:
+  icon: "terminal"
+  color: "blue"
+inputs:
+  atmos-version:
+    description: "Version Spec of the version to use. Examples: 1.x, 10.15.1, >=10.15.0."
+    default: "latest"
+  install-wrapper:
+    description:
+      Flag to indicate if the wrapper script will be installed to wrap subsequent calls of the `atmos` binary and expose
+      its STDOUT, STDERR, and exit code as outputs named `stdout`, `stderr`, and `exitcode` respectively. Defaults to
+      `true`.
+    default: "true"
+    required: false
+  token:
+    description:
+      Used to pull node distributions from Cloud Posse's GitHub repository. Since there's a default, this is typically
+      not supplied by the user. When running this action on github.com, the default value is sufficient. When running on
+      GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+    default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+outputs:
+  atmos-version:
+    description: "The installed atmos version."
+runs:
+  using: "node16"
+  main: "dist/index.js"

@@ -1,0 +1,112 @@
+---
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+# Name of this project
+name: github-action-setup-atmos
+
+# Tags of this project
+tags:
+  - github-action
+  - atmos
+
+# Logo for this project
+#logo: docs/logo.png
+
+# License of this project
+license: "APACHE2"
+
+# Canonical GitHub repo
+github_repo: cloudposse/github-action-setup-atmos
+
+# Badges to display
+badges:
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/github-action-setup-atmos.svg"
+    url: "https://github.com/cloudposse/github-action-setup-atmos/releases/latest"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+
+related: []
+
+# Short description of this project
+description: Install atmos for use in GitHub Actions
+
+introduction: |-
+  This repo contains a GitHub Action to setup [atmos](https://github.com/cloudposse/atmos) for use in GitHub Actions. It 
+  installs the specified version of atmos and adds it to the `PATH` so it can be used in subsequent steps. In addition, 
+  it optionally installs a wrapper script that will capture the `stdout`, `stderr`, and `exitcode` of the `atmos` 
+  command and make them available to subsequent steps via outputs of the same name.
+references:
+  - name: "github-actions-workflows"
+    description: "Reusable workflows for different types of projects"
+    url: "https://github.com/cloudposse/github-actions-workflows"
+  - name: "example-github-action-release-workflow"
+    description: "Example application with complicated release workflow"
+    url: "https://github.com/cloudposse/example-github-action-release-workflow"
+
+# How to use this project
+usage: |-
+  ```yaml
+  steps:
+    - uses: hashicorp/setup-terraform@v2
+    
+    - name: Setup atmos
+      uses: cloudposse/setup-atmos@v1
+  ````
+
+  To install a specific version of atmos, set the `version` input:
+
+  ```yaml
+  steps:
+    - uses: hashicorp/setup-terraform@v2
+
+    - name: Setup atmos
+      uses: cloudposse/setup-atmos@v1
+      with:
+        version: 0.15.0
+  ````
+
+  The wrapper script installation can be skipped by setting the `install-wrapper` input to `false`:
+
+  ```yaml
+  steps:
+    - uses: hashicorp/setup-terraform@v2
+
+    - name: Setup atmos
+      uses: cloudposse/setup-atmos@v1
+      with:
+        install-wrapper: false
+  ````
+
+  Subsequent steps of the GitHub action can use the wrapper scipt to capture the `stdout`, `stderr`, and `exitcode` if 
+  the wrapper script was installed:
+
+  ```yaml
+  steps:
+    - uses: hashicorp/setup-terraform@v2
+
+    - name: Setup atmos
+      uses: cloudposse/setup-atmos@v1
+      with:
+        install-wrapper: true
+
+    - name: Run atmos
+      id: atmos
+      run: atmos terraform plan
+
+    - run: echo ${{ steps.atmos.outputs.stdout }}
+    - run: echo ${{ steps.atmos.outputs.stderr }}
+    - run: echo ${{ steps.atmos.outputs.exitcode }}
+  ```
+
+include:
+  - "docs/github-action.md"
+
+# Contributors to this project
+contributors:
+  - name: "Matt Calhoun"
+    github: "mcalhoun"

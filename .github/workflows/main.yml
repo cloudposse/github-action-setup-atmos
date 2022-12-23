@@ -7,11 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
-          cache: "yarn"
+          node-version-file: package.json
+          cache: yarn
 
       - name: Install Dependencies
         run: yarn --frozen-lockfile --prefer-offline
@@ -26,17 +29,36 @@ jobs:
         run: yarn test
 
       - name: Build
-        run: yarn build
+        run: |
+          yarn clean
+          yarn build
+          yarn build:wrapper
 
       - name: Integration Test
         uses: ./
         with:
-          atmos_version: 1.12.2
+          atmos-version: latest
+          install-wrapper: true
+
+      - name: permissions
+        run: |
+          chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos
+          chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos-bin
+          cat -v /home/runner/work/github-action-setup-atmos/atmos/atmos
+
+      - name: atmos
+        id: atmos
+        run: atmos version
+
+      - name: Verify outputs are available
+        run: |
+          echo "stdout: ${{ steps.atmos.outputs.stdout }}"
+          echo "stderr: ${{ steps.atmos.outputs.stderr }}"
+          echo "exitcode: ${{ steps.atmos.outputs.exitcode }}"
 
       - name: Commit and Push Changes
         uses: EndBug/add-and-commit@v9
         with:
-          committer_name: GitHub Actions
+          committer_name: GitHub Action
           # https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/
           message: "chore: [skip-ci] format code and generate build artifacts"
-          add: "."
