@@ -37,9 +37,6 @@ jobs:
           yarn build
           yarn build:wrapper
           printf '%s\n\n%s\n' "#!/usr/bin/env -S NODE_NO_WARNINGS=1 node" "$(cat dist/wrapper/index.js)" >dist/wrapper/index.js
-          chmod +x dist/wrapper/index.js
-          chmod +x /home/runner/work/github-action-setup-atmos/atmos/atmos
-          chmod +x /home/runner/work/github-action-setup-atmos/atmos/atmos-bin
 
       - name: Integration Test
         uses: ./
@@ -55,6 +52,8 @@ jobs:
           echo $ATMOS_CLI_PATH
           atmos-bin version
           atmos version
+          chmod +x /home/runner/work/github-action-setup-atmos/atmos/atmos
+          chmod +x /home/runner/work/github-action-setup-atmos/atmos/atmos-bin
 
       - name: Verify outputs are available
         run: |
