@@ -36,7 +36,6 @@ jobs:
         run: |
           yarn build
           yarn build:wrapper
-          printf '%s\n\n%s\n' "#!/usr/bin/env node" "$(cat dist/wrapper/index.js)" >dist/wrapper/index.js
 
       - name: Integration Test
         uses: ./

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
 import * as io from "@actions/io";
@@ -17,7 +19,6 @@ const guardAtmosInstalled = async () => {
     core.info("path: " + pathToCLI);
     // This will fail if Atmos isn't found, which is what we want
     await guardAtmosInstalled();
-    core.info("after guard");
 
     // Create listeners to receive output (in memory) as well
     const stdout = new OutputListener();
