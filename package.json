@@ -10,7 +10,7 @@
     "lint": "eslint --fix src/**/*.ts",
     "lint:check": "eslint src/**/*.ts",
     "build": "ncc build src/setup-atmos.ts -C --license licenses.txt -o dist",
-    "build:wrapper": "ncc build src/wrapper.ts -C --license licenses.txt -o dist/wrapper",
+    "build:wrapper": "ncc build src/wrapper.ts -m -C --license licenses.txt -o dist/wrapper",
     "test": "jest"
   },
   "repository": {
