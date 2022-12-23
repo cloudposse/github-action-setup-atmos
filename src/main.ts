@@ -32,4 +32,3 @@ export const run = async () => {
     core.error(error);
   }
 };
-

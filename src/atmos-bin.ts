@@ -10,4 +10,3 @@ export const getAtmosWrappedBinaryName = (): string => getAtmosBinaryName(true);
 
 export const getAtmosWrappedPath = () =>
   [process.env.ATMOS_CLI_PATH, getAtmosWrappedBinaryName()].join(sep);
-

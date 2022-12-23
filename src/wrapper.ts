@@ -62,4 +62,3 @@ const guardAtmosInstalled = async () => {
     core.setFailed(err);
   }
 })();
-
