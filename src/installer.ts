@@ -169,6 +169,16 @@ export const installWrapperBin = async (
     await io.cp(source, destination);
     fs.chmodSync(destination, 0o775);
 
+    // This is a hack to fix the line ending of the shebang, which for some unknown reason is being written as CR
+    // rather than LF
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const replaceInFile = require("replace-in-file");
+    const replace = [/\r/g];
+    const replacement = ["\n"];
+    const files = [destination];
+
+    await replaceInFile({ files, replace, replacement });
+
     // Export a new environment variable, so our wrapper can locate the binary
     core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
 

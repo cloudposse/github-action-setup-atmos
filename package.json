@@ -31,7 +31,8 @@
     "@actions/io": "^1.1.2",
     "@actions/tool-cache": "^2.0.1",
     "axios": "^1.2.1",
-    "octokit": "^2.0.10"
+    "octokit": "^2.0.10",
+    "replace-in-file": "^6.3.5"
   },
   "devDependencies": {
     "@types/jest": "^29.2.4",
@@ -59,4 +60,3 @@
     "yarn": "1.22.19"
   }
 }
-
