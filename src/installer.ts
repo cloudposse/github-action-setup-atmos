@@ -167,7 +167,7 @@ export const installWrapperBin = async (
     core.info(`Installing wrapper script from ${source} to ${destination}.`);
 
     const orig = readFileSync(source, "utf8");
-    const contents = orig.replace(/\r/g, "\\n\\n");
+    const contents = `#!/usr/bin/env node\n\n${orig}`;
     //await io.cp(source, destination);
     await writeFileSync(destination, contents, "utf8");
     fs.chmodSync(destination, 0o775);
