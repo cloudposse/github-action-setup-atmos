@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs, { readFileSync, writeFileSync } from "fs";
 import os from "os";
 import * as path from "path";
 
@@ -166,7 +166,10 @@ export const installWrapperBin = async (
 
     core.info(`Installing wrapper script from ${source} to ${destination}.`);
 
-    await io.cp(source, destination);
+    const orig = readFileSync(source, "utf8");
+    const contents = orig.replace(/\\m/g, "\\n");
+    //await io.cp(source, destination);
+    await writeFileSync(destination, contents, "utf8");
     fs.chmodSync(destination, 0o775);
 
     // This is a hack to fix the line ending of the shebang, which for some unknown reason is being written as CR
