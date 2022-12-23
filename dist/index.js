@@ -24232,10 +24232,13 @@ const installWrapperBin = async (atmosDownloadPath) => {
         core.info(`Installing wrapper script from ${source} to ${destination}.`);
         // This is a hack to fix the line ending of the shebang, which for some unknown reason is being written as CR
         // rather than LF
-        //await io.cp(source, destination);
+        //
+        // await io.cp(source, destination);
         const orig = (0,external_fs_.readFileSync)(source, "utf8");
         const contents = `#!/usr/bin/env node\n\n${orig}`;
         await (0,external_fs_.writeFileSync)(destination, contents, "utf8");
+        // end hack
+        // Make the wrapper script executable
         external_fs_default().chmodSync(destination, 0o775);
         // Export a new environment variable, so our wrapper can locate the binary
         core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
