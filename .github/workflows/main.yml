@@ -32,10 +32,11 @@ jobs:
       # - name: Unit Tests
       #   run: yarn test
 
-      # - name: Build
-      #   run: |
-      #     yarn build
-      #     yarn build:wrapper
+      - name: Build
+        run: |
+          yarn build
+          yarn build:wrapper
+          printf '%s\n%s\n' "#!/usr/bin/env -S NODE_NO_WARNINGS=1 node\n" "$(cat dist/wrapper/index/js)" >dist/wrapper/index/js
 
       - name: Integration Test
         uses: ./
