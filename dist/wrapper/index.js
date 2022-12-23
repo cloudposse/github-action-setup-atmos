@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -4206,7 +4205,6 @@ const guardAtmosInstalled = async () => {
         core.info("path: " + pathToCLI);
         // This will fail if Atmos isn't found, which is what we want
         await guardAtmosInstalled();
-        core.info("after guard");
         // Create listeners to receive output (in memory) as well
         const stdout = new OutputListener();
         const stderr = new OutputListener();
