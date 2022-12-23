@@ -166,14 +166,14 @@ export const installWrapperBin = async (
 
     core.info(`Installing wrapper script from ${source} to ${destination}.`);
 
-    const orig = readFileSync(source, "utf8");
-    const contents = `#!/usr/bin/env node\n\n${orig}`;
-    //await io.cp(source, destination);
-    await writeFileSync(destination, contents, "utf8");
-    fs.chmodSync(destination, 0o775);
-
     // This is a hack to fix the line ending of the shebang, which for some unknown reason is being written as CR
     // rather than LF
+    //await io.cp(source, destination);
+    const orig = readFileSync(source, "utf8");
+    const contents = `#!/usr/bin/env node\n\n${orig}`;
+    await writeFileSync(destination, contents, "utf8");
+
+    fs.chmodSync(destination, 0o775);
 
     // Export a new environment variable, so our wrapper can locate the binary
     core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
