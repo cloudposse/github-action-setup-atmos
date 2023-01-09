@@ -264,6 +264,7 @@ export const getAtmos = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     core.setFailed(err);
+    throw err;
   }
 
   return { toolPath, info };
