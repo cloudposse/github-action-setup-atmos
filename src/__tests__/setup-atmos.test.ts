@@ -95,13 +95,19 @@ describe("Setup Atmos", () => {
     await run();
     nockDoneCb();
 
-    expect(wrapperInstallMock).not.toHaveBeenCalled();
+    expect(wrapperInstallMock).toHaveBeenCalledWith(
+      "atmos_1.15.0_linux_amd64",
+      [path.resolve(__dirname, "..", "..", ".."), "atmos", "atmos"].join(
+        path.sep
+      ),
+      { force: true }
+    );
   });
 
   it("installs atmos with wrapper", async () => {
     setupSpies("latest", "1.15.0", true);
 
-    const wrapperInstallMock = jest.spyOn(io, "mv");
+    const wrapperInstallMock = jest.spyOn(io, "cp");
 
     await run();
     nockDoneCb();
@@ -110,7 +116,8 @@ describe("Setup Atmos", () => {
       "atmos_1.15.0_linux_amd64",
       [path.resolve(__dirname, "..", "..", ".."), "atmos", "atmos-bin"].join(
         path.sep
-      )
+      ),
+      { force: true }
     );
   });
 });

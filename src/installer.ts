@@ -207,7 +207,11 @@ export const installAtmosVersion = async (
   const toolPath = path.join(atmosInstallPath, atmosBinName);
 
   core.info("Renaming downloaded file...");
-  await io.mv(downloadPath, toolPath);
+  // We need to use copy and rm rather than reanme because rename fails if the temp directory is on a different mount
+  // point. We get the error:
+  // EXDEV: cross-device link not permitted, rename '/home/runner/work/_temp/{uuid}' -> '/path/to/source/atmos/atmos-bin'
+  await io.cp(downloadPath, toolPath, { force: true });
+  await io.rmRF(downloadPath);
   core.info(`Successfully renamed atmos from ${downloadPath} to ${toolPath}`);
 
   fs.chmodSync(toolPath, 0o775);
