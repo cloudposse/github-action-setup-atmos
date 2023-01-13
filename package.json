@@ -34,7 +34,7 @@
     "axios": "^1.2.1",
     "octokit": "^2.0.10",
     "replace-in-file": "^6.3.5",
-    "rimraf": "^3.0.2"
+    "rimraf": "^4.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.2.4",
