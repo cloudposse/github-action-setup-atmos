@@ -1,0 +1,13 @@
+name: Feature branch
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  major-release-tagger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: cloudposse/github-action-major-release-tagger@v1
+        with:
+          dry-run: 'true'
