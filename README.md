@@ -76,7 +76,7 @@ steps:
   - uses: hashicorp/setup-terraform@v2
   
   - name: Setup atmos
-    uses: cloudposse/setup-atmos@v1
+    uses: cloudposse/github-action-setup-atmos@v1
 ````
 
 To install a specific version of atmos, set the `version` input:
@@ -86,7 +86,7 @@ steps:
   - uses: hashicorp/setup-terraform@v2
 
   - name: Setup atmos
-    uses: cloudposse/setup-atmos@v1
+    uses: cloudposse/github-action-setup-atmos@v1
     with:
       version: 0.15.0
 ````
@@ -98,7 +98,7 @@ steps:
   - uses: hashicorp/setup-terraform@v2
 
   - name: Setup atmos
-    uses: cloudposse/setup-atmos@v1
+    uses: cloudposse/github-action-setup-atmos@v1
     with:
       install-wrapper: false
 ````
@@ -111,7 +111,7 @@ steps:
   - uses: hashicorp/setup-terraform@v2
 
   - name: Setup atmos
-    uses: cloudposse/setup-atmos@v1
+    uses: cloudposse/github-action-setup-atmos@v1
     with:
       install-wrapper: true
 
@@ -242,7 +242,7 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 
 ## Copyright
 
-Copyright © 2017-2022 [Cloud Posse, LLC](https://cpco.io/copyright)
+Copyright © 2017-2023 [Cloud Posse, LLC](https://cpco.io/copyright)
 
 
 
