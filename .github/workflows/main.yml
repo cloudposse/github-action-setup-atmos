@@ -62,3 +62,9 @@ jobs:
           committer_name: GitHub Action
           # https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/
           message: "chore: [skip-ci] format code and generate build artifacts"
+  major-release-tagger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: cloudposse/github-action-major-release-tagger@v1
+        with:
+          dry-run: 'true'
