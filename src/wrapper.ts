@@ -31,6 +31,7 @@ const guardAtmosInstalled = async () => {
     const options = {
       listeners,
       ignoreReturnCode: true,
+      silent: true, // avoid printing command in stdout: https://github.com/actions/toolkit/issues/649
     };
 
     const exitCode = await exec(pathToCLI, args, options);
@@ -39,6 +40,10 @@ const guardAtmosInstalled = async () => {
     core.debug(`stderr: ${stderr.contents}`);
     core.debug(`exitcode: ${exitCode}`);
 
+    // Pass-through stdout/err as `exec` won't anymore because we are passing `silent: true` option
+    process.stdout.write(stdout.contents);
+    process.stderr.write(stderr.contents);
+
     // Set outputs, result, exitcode, and stderr
     core.setOutput("stdout", stdout.contents);
     core.setOutput("stderr", stderr.contents);
@@ -46,13 +51,13 @@ const guardAtmosInstalled = async () => {
 
     if (exitCode === 0 || exitCode === 2) {
       // A exitCode of 0 is considered a success
-      // An exitCode of 2 may be returned when the '-detailed-exitcode' option is passed to terraform plan. This denotes
+      // An exitCode of 2 may be returned when the '-detailed-exitcode' option is passed to atmos terraform plan. This denotes
       // Success with non-empty diff (changes present).
       return;
     }
 
     // A non-zero exitCode is considered an error
-    core.setFailed(`Atmos exited with code ${exitCode}.`);
+    core.setFailed(`atmos exited with code ${exitCode}.`);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     core.setFailed(err);
