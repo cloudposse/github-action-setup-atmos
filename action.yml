@@ -8,9 +8,6 @@ inputs:
   atmos-version:
     description: "Version Spec of the version to use. Examples: 1.x, 10.15.1, >=10.15.0."
     default: "latest"
-  cache:
-    description: Used to specify whether caching is needed. Set to true, if you'd like to enable caching.
-    default: "true"
   install-wrapper:
     description:
       Flag to indicate if the wrapper script will be installed to wrap subsequent calls of the `atmos` binary and expose

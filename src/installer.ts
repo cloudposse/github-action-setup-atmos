@@ -262,7 +262,13 @@ export const getAtmos = async (
       toolPath = path.join(toolPath);
     }
 
-    await tc.cacheDir(toolPath, "atmos", resolvedVersion, arch);
+    const cachedDir = await tc.cacheDir(
+      toolPath,
+      "atmos",
+      resolvedVersion,
+      arch,
+    );
+    core.info(`Cached version ${resolvedVersion} for ${arch} in ${cachedDir}`);
 
     core.addPath(toolPath);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

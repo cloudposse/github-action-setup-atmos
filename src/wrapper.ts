@@ -52,7 +52,7 @@ const guardAtmosInstalled = async () => {
     }
 
     // A non-zero exitCode is considered an error
-    core.setFailed(`Atmos exited with code ${exitCode}.`);
+    core.setFailed(`atmos exited with code ${exitCode}.`);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     core.setFailed(err);
