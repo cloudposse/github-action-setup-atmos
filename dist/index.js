@@ -26626,26 +26626,27 @@ const installAtmosVersion = async (info, auth, arch, installWrapper) => {
 };
 const getAtmos = async (versionSpec, auth, arch = external_os_default().arch(), installWrapper) => {
     const osPlat = external_os_default().platform();
-    // check cache
+    core.info(`Attempting to download ${versionSpec}...`);
+    const info = await getMatchingVersion(versionSpec, auth, arch);
+    if (!info) {
+        throw new Error(`Unable to find atmos version '${versionSpec}' for platform ${osPlat} and architecture ${arch}.`);
+    }
+    const { resolvedVersion } = info;
+    // Check to see if the version is already in the local cache
     let toolPath;
-    toolPath = tool_cache.find("atmos", versionSpec, arch);
-    // If not found in cache, download
+    toolPath = tool_cache.find("atmos", resolvedVersion, arch);
     if (toolPath) {
         core.info(`Found in cache @ ${toolPath}`);
-        return { toolPath, info: null };
-    }
-    core.info(`Attempting to download ${versionSpec}...`);
-    let info = null;
-    info = await getMatchingVersion(versionSpec, auth, arch);
-    if (!info) {
-        throw new Error(`Unable to find Atmos version '${versionSpec}' for platform ${osPlat} and architecture ${arch}.`);
+        core.addPath(toolPath);
+        return { toolPath, info };
     }
     try {
-        core.info(`Installing version ${info.resolvedVersion} from GitHub`);
+        core.info(`Installing version ${resolvedVersion} from GitHub`);
         toolPath = await installAtmosVersion(info, undefined, arch, installWrapper);
         if (osPlat != "win32") {
             toolPath = external_path_.join(toolPath);
         }
+        await tool_cache.cacheDir(toolPath, "atmos", resolvedVersion, arch);
         core.addPath(toolPath);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
