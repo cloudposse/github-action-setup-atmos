@@ -12,7 +12,7 @@ import { getAtmosBinaryName, getAtmosWrappedBinaryName } from "./atmos-bin";
 import {
   IAtmosVersionInfo,
   IAtmosVersion,
-  IAtmosVersionFile,
+  IAtmosVersionFile
 } from "./interfaces";
 import * as sys from "./system";
 
@@ -29,7 +29,7 @@ export const makeSemver = (version: string): string => {
   const semVersion = semver.coerce(parts[0])?.version;
   if (!semVersion) {
     throw new Error(
-      `The version: ${version} can't be changed to SemVer notation`,
+      `The version: ${version} can't be changed to SemVer notation`
     );
   }
 
@@ -41,7 +41,7 @@ export const makeSemver = (version: string): string => {
 
   if (!fullVersion) {
     throw new Error(
-      `The version: ${version} can't be changed to SemVer notation`,
+      `The version: ${version} can't be changed to SemVer notation`
     );
   }
   return fullVersion;
@@ -50,7 +50,7 @@ export const makeSemver = (version: string): string => {
 export const findVersionMatch = (
   versionSpec: string,
   arch = os.arch(),
-  candidates: IAtmosVersion[] | null,
+  candidates: IAtmosVersion[] | null
 ): IAtmosVersion | undefined => {
   const archFilter = sys.getArch(arch);
   const platFilter = sys.getPlatform();
@@ -71,7 +71,7 @@ export const findVersionMatch = (
     if (semver.satisfies(version, versionSpec) || versionSpec == "latest") {
       atmosFile = candidate.assets.find((file) => {
         core.debug(
-          `${file.arch}===${archFilter} && ${file.os}===${platFilter}`,
+          `${file.arch}===${archFilter} && ${file.os}===${platFilter}`
         );
 
         return file.arch === archFilter && file.os === platFilter;
@@ -94,7 +94,7 @@ export const findVersionMatch = (
 };
 
 export const getVersionsFromGitHubReleases = async (
-  auth: string | undefined,
+  auth: string | undefined
 ): Promise<IAtmosVersion[] | null> => {
   const octokit = new Octokit({ auth });
 
@@ -103,8 +103,8 @@ export const getVersionsFromGitHubReleases = async (
     octokit.rest.repos.listReleases,
     {
       owner: "cloudposse",
-      repo: "atmos",
-    },
+      repo: "atmos"
+    }
   )) {
     release.data.forEach((r) => {
       const { tag_name, prerelease } = r;
@@ -131,7 +131,7 @@ export const getVersionsFromGitHubReleases = async (
 export const getMatchingVersion = async (
   versionSpec: string,
   auth: string | undefined,
-  arch: string,
+  arch: string
 ): Promise<IAtmosVersionInfo | null> => {
   const candidates: IAtmosVersion[] | null =
     await getVersionsFromGitHubReleases(auth);
@@ -139,7 +139,7 @@ export const getMatchingVersion = async (
   const version: IAtmosVersion | undefined = findVersionMatch(
     versionSpec,
     arch,
-    candidates,
+    candidates
   );
   if (!version) {
     return null;
@@ -148,19 +148,19 @@ export const getMatchingVersion = async (
   return <IAtmosVersionInfo>{
     downloadUrl: version.assets[0].browser_download_url,
     resolvedVersion: version.name,
-    fileName: version.assets[0].name,
+    fileName: version.assets[0].name
   };
 };
 
 export const installWrapperBin = async (
-  atmosDownloadPath: string,
+  atmosDownloadPath: string
 ): Promise<string> => {
   let source = "";
   let destination = "";
 
   try {
     source = path.resolve(
-      [__dirname, "..", "dist", "wrapper", "index.js"].join(path.sep),
+      [__dirname, "..", "dist", "wrapper", "index.js"].join(path.sep)
     );
     destination = [atmosDownloadPath, "atmos"].join(path.sep);
 
@@ -193,7 +193,7 @@ export const installAtmosVersion = async (
   info: IAtmosVersionInfo,
   auth: string | undefined,
   arch: string,
-  installWrapper: boolean,
+  installWrapper: boolean
 ): Promise<string> => {
   const atmosBinName = installWrapper
     ? getAtmosWrappedBinaryName()
@@ -224,7 +224,7 @@ export const getAtmos = async (
   versionSpec: string,
   auth: string | undefined,
   arch = os.arch(),
-  installWrapper: boolean,
+  installWrapper: boolean
 ): Promise<{ toolPath: string; info: IAtmosVersionInfo | null }> => {
   const osPlat: string = os.platform();
 
@@ -233,11 +233,11 @@ export const getAtmos = async (
   const info: IAtmosVersionInfo | null = await getMatchingVersion(
     versionSpec,
     auth,
-    arch,
+    arch
   );
   if (!info) {
     throw new Error(
-      `Unable to find atmos version '${versionSpec}' for platform ${osPlat} and architecture ${arch}.`,
+      `Unable to find atmos version '${versionSpec}' for platform ${osPlat} and architecture ${arch}.`
     );
   }
 
@@ -266,7 +266,7 @@ export const getAtmos = async (
       toolPath,
       "atmos",
       resolvedVersion,
-      arch,
+      arch
     );
     core.info(`Cached version ${resolvedVersion} for ${arch} in ${cachedDir}`);
 

@@ -23,14 +23,14 @@ const guardAtmosInstalled = async () => {
     const stderr = new OutputListener();
     const listeners = {
       stdout: stdout.listener,
-      stderr: stderr.listener,
+      stderr: stderr.listener
     };
 
     // Execute atmos and capture output
     const args = process.argv.slice(2);
     const options = {
       listeners,
-      ignoreReturnCode: true,
+      ignoreReturnCode: true
     };
 
     const exitCode = await exec(pathToCLI, args, options);

@@ -19,11 +19,11 @@ export const run = async () => {
       versionSpec,
       auth,
       arch,
-      installWrapper,
+      installWrapper
     );
 
     core.info(
-      `Successfully set up Atmos version ${versionSpec} in ${toolPath}`,
+      `Successfully set up Atmos version ${versionSpec} in ${toolPath}`
     );
 
     core.setOutput("atmos-version", info?.resolvedVersion);

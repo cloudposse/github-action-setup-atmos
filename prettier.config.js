@@ -2,6 +2,7 @@
 const config = {
   singleQuote: false,
   tabWidth: 2,
+  trailingComma: 'none',
   useTabs: false,
 };
 
