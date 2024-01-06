@@ -29332,7 +29332,7 @@ const getVersionsFromGitHubReleases = async (auth) => {
     const versions = [];
     for await (const release of octokit.paginate.iterator(octokit.rest.repos.listReleases, {
         owner: "cloudposse",
-        repo: "atmos",
+        repo: "atmos"
     })) {
         release.data.forEach((r) => {
             const { tag_name, prerelease } = r;
@@ -29361,7 +29361,7 @@ const getMatchingVersion = async (versionSpec, auth, arch) => {
     return {
         downloadUrl: version.assets[0].browser_download_url,
         resolvedVersion: version.name,
-        fileName: version.assets[0].name,
+        fileName: version.assets[0].name
     };
 };
 const installWrapperBin = async (atmosDownloadPath) => {
