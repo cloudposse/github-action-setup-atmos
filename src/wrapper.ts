@@ -30,14 +30,8 @@ const guardAtmosInstalled = async () => {
     const args = process.argv.slice(2);
     const options = {
       listeners,
-<<<<<<< HEAD
       ignoreReturnCode: true,
-      silent: true, // avoid printing command in stdout: https://github.com/actions/toolkit/issues/649
-||||||| b3349c9
-      ignoreReturnCode: true,
-=======
-      ignoreReturnCode: true
->>>>>>> main
+      silent: true // avoid printing command in stdout: https://github.com/actions/toolkit/issues/649
     };
 
     const exitCode = await exec(pathToCLI, args, options);
