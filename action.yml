@@ -17,7 +17,7 @@ inputs:
     required: false
   token:
     description:
-      Used to pull node distributions from Cloud Posse's GitHub repository. Since there's a default, this is typically
+      Used to pull atmos distributions from Cloud Posse's GitHub repository. Since there's a default, this is typically
       not supplied by the user. When running this action on github.com, the default value is sufficient. When running on
       GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
