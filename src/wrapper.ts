@@ -23,14 +23,14 @@ const guardAtmosInstalled = async () => {
     const stderr = new OutputListener();
     const listeners = {
       stdout: stdout.listener,
-      stderr: stderr.listener,
+      stderr: stderr.listener
     };
 
     // Execute atmos and capture output
     const args = process.argv.slice(2);
     const options = {
       listeners,
-      ignoreReturnCode: true,
+      ignoreReturnCode: true
     };
 
     const exitCode = await exec(pathToCLI, args, options);
@@ -52,7 +52,7 @@ const guardAtmosInstalled = async () => {
     }
 
     // A non-zero exitCode is considered an error
-    core.setFailed(`Atmos exited with code ${exitCode}.`);
+    core.setFailed(`atmos exited with code ${exitCode}.`);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     core.setFailed(err);

@@ -12,7 +12,7 @@ import { getAtmosBinaryName, getAtmosWrappedBinaryName } from "./atmos-bin";
 import {
   IAtmosVersionInfo,
   IAtmosVersion,
-  IAtmosVersionFile,
+  IAtmosVersionFile
 } from "./interfaces";
 import * as sys from "./system";
 
@@ -103,7 +103,7 @@ export const getVersionsFromGitHubReleases = async (
     octokit.rest.repos.listReleases,
     {
       owner: "cloudposse",
-      repo: "atmos",
+      repo: "atmos"
     }
   )) {
     release.data.forEach((r) => {
@@ -148,7 +148,7 @@ export const getMatchingVersion = async (
   return <IAtmosVersionInfo>{
     downloadUrl: version.assets[0].browser_download_url,
     resolvedVersion: version.name,
-    fileName: version.assets[0].name,
+    fileName: version.assets[0].name
   };
 };
 
@@ -228,33 +228,47 @@ export const getAtmos = async (
 ): Promise<{ toolPath: string; info: IAtmosVersionInfo | null }> => {
   const osPlat: string = os.platform();
 
-  // check cache
-  let toolPath: string;
-  toolPath = tc.find("atmos", versionSpec, arch);
-
-  // If not found in cache, download
-  if (toolPath) {
-    core.info(`Found in cache @ ${toolPath}`);
-    return { toolPath, info: null };
-  }
-
   core.info(`Attempting to download ${versionSpec}...`);
-  let info: IAtmosVersionInfo | null = null;
 
-  info = await getMatchingVersion(versionSpec, auth, arch);
+  const info: IAtmosVersionInfo | null = await getMatchingVersion(
+    versionSpec,
+    auth,
+    arch
+  );
   if (!info) {
     throw new Error(
-      `Unable to find Atmos version '${versionSpec}' for platform ${osPlat} and architecture ${arch}.`
+      `Unable to find atmos version '${versionSpec}' for platform ${osPlat} and architecture ${arch}.`
     );
   }
 
+  const { resolvedVersion } = info;
+
+  // Check to see if the version is already in the local cache
+  let toolPath: string;
+  toolPath = tc.find("atmos", resolvedVersion, arch);
+
+  if (toolPath) {
+    core.info(`Found in cache @ ${toolPath}`);
+    core.addPath(toolPath);
+
+    return { toolPath, info };
+  }
+
   try {
-    core.info(`Installing version ${info.resolvedVersion} from GitHub`);
+    core.info(`Installing version ${resolvedVersion} from GitHub`);
     toolPath = await installAtmosVersion(info, undefined, arch, installWrapper);
 
     if (osPlat != "win32") {
       toolPath = path.join(toolPath);
     }
+
+    const cachedDir = await tc.cacheDir(
+      toolPath,
+      "atmos",
+      resolvedVersion,
+      arch
+    );
+    core.info(`Cached version ${resolvedVersion} for ${arch} in ${cachedDir}`);
 
     core.addPath(toolPath);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
