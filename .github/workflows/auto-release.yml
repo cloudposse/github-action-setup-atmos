@@ -13,6 +13,6 @@ jobs:
     steps:
       - uses: cloudposse/github-action-auto-release@v1
         with:
-          prerelease: false
           publish: false
+          prerelease: false
           config-name: auto-release.yml          
