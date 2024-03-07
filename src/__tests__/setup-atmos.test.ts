@@ -83,7 +83,10 @@ describe("Setup Atmos", () => {
       nockDoneCb();
 
       expect(setOutputMock).toHaveBeenCalled();
-      expect(setOutputMock).toBeCalledWith("atmos-version", `v${expected}`);
+      expect(setOutputMock).toHaveBeenCalledWith(
+        "atmos-version",
+        `v${expected}`
+      );
     }
   );
 

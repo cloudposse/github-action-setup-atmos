@@ -15,16 +15,9 @@ export const run = async () => {
     const token = core.getInput("token");
     const auth = !token ? undefined : `token ${token}`;
 
-    const { toolPath, info } = await installer.getAtmos(
-      versionSpec,
-      auth,
-      arch,
-      installWrapper
-    );
+    const { toolPath, info } = await installer.getAtmos(versionSpec, auth, arch, installWrapper);
 
-    core.info(
-      `Successfully set up Atmos version ${versionSpec} in ${toolPath}`
-    );
+    core.info(`Successfully set up Atmos version ${versionSpec} in ${toolPath}`);
 
     core.setOutput("atmos-version", info?.resolvedVersion);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
