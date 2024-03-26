@@ -57,7 +57,7 @@ steps:
   - uses: hashicorp/setup-terraform@v2
   
   - name: Setup atmos
-    uses: cloudposse/github-action-setup-atmos@v1
+    uses: cloudposse/github-action-setup-atmos@v2
 ````
 
 To install a specific version of atmos, set the `version` input:
@@ -67,7 +67,7 @@ steps:
   - uses: hashicorp/setup-terraform@v2
 
   - name: Setup atmos
-    uses: cloudposse/github-action-setup-atmos@v1
+    uses: cloudposse/github-action-setup-atmos@v2
     with:
       version: 0.15.0
 ````
@@ -79,7 +79,7 @@ steps:
   - uses: hashicorp/setup-terraform@v2
 
   - name: Setup atmos
-    uses: cloudposse/github-action-setup-atmos@v1
+    uses: cloudposse/github-action-setup-atmos@v2
     with:
       install-wrapper: false
 ````
@@ -92,7 +92,7 @@ steps:
   - uses: hashicorp/setup-terraform@v2
 
   - name: Setup atmos
-    uses: cloudposse/github-action-setup-atmos@v1
+    uses: cloudposse/github-action-setup-atmos@v2
     with:
       install-wrapper: true
 
