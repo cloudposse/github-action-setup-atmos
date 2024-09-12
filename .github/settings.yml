@@ -5,3 +5,4 @@ repository:
   description: A GitHub Actions that installs the Atmos CLI
   homepage: https://cloudposse.com/accelerate
   topics: ""
+
