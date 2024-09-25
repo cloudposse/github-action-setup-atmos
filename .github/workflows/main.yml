@@ -65,6 +65,6 @@ jobs:
   major-release-tagger:
     runs-on: ubuntu-latest
     steps:
-      - uses: cloudposse/github-action-major-release-tagger@v1
+      - uses: cloudposse/github-action-major-release-tagger@v2
         with:
           dry-run: 'true'
