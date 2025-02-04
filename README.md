@@ -60,7 +60,7 @@ steps:
   - name: Setup atmos
     uses: cloudposse/github-action-setup-atmos@v2
     with:
-      version: 0.15.0
+      atmos-version: 0.15.0
 ````
 
 The wrapper script installation can be skipped by setting the `install-wrapper` input to `false`:
