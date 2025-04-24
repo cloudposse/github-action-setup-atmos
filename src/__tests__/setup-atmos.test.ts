@@ -37,7 +37,6 @@ describe("Setup Atmos", () => {
   const setupSpies = (
     versionSpec: string,
     expectedVersion: string,
-    installWrapper = true
   ) => {
     const platform = "linux";
     const arch = "amd64";
@@ -59,7 +58,6 @@ describe("Setup Atmos", () => {
       .spyOn(core, "getInput")
       .mockReturnValueOnce(versionSpec) // atmos-version
       .mockReturnValueOnce("") // architecture
-      .mockReturnValueOnce(installWrapper ? "true" : "false"); // install-wrapper
   };
 
   it.each`
@@ -91,7 +89,7 @@ describe("Setup Atmos", () => {
   );
 
   it("installs atmos without wrapper", async () => {
-    setupSpies("latest", "1.15.0", false);
+    setupSpies("latest", "1.15.0");
 
     const wrapperInstallMock = jest.spyOn(io, "cp");
 
@@ -99,22 +97,6 @@ describe("Setup Atmos", () => {
     nockDoneCb();
 
     expect(wrapperInstallMock).not.toHaveBeenCalled();
-  });
-
-  it("installs atmos with wrapper", async () => {
-    setupSpies("latest", "1.15.0", true);
-
-    const wrapperInstallMock = jest.spyOn(io, "mv");
-
-    await run();
-    nockDoneCb();
-
-    expect(wrapperInstallMock).toHaveBeenCalledWith(
-      "atmos_1.15.0_linux_amd64",
-      [path.resolve(__dirname, "..", "..", ".."), "atmos", "atmos-bin"].join(
-        path.sep
-      )
-    );
   });
 });
 

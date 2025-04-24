@@ -8,7 +8,7 @@ import * as tc from "@actions/tool-cache";
 import { Octokit } from "octokit";
 import * as semver from "semver";
 
-import { getAtmosBinaryName, getAtmosWrappedBinaryName } from "./atmos-bin";
+import { getAtmosBinaryName } from "./atmos-bin";
 import { IAtmosVersionInfo, IAtmosVersion, IAtmosVersionFile } from "./interfaces";
 import * as sys from "./system";
 
@@ -168,10 +168,8 @@ export const installWrapperBin = async (atmosDownloadPath: string): Promise<stri
 export const installAtmosVersion = async (
   info: IAtmosVersionInfo,
   auth: string | undefined,
-  arch: string,
-  installWrapper: boolean
 ): Promise<string> => {
-  const atmosBinName = installWrapper ? getAtmosWrappedBinaryName() : getAtmosBinaryName();
+  const atmosBinName = getAtmosBinaryName();
 
   const homeDir = path.resolve([__dirname, "..", ".."].join(path.sep));
   const atmosInstallPath = [homeDir, "atmos"].join(path.sep);
@@ -186,10 +184,6 @@ export const installAtmosVersion = async (
 
   fs.chmodSync(toolPath, 0o775);
 
-  if (installWrapper) {
-    await installWrapperBin(atmosInstallPath);
-  }
-
   core.info(`Successfully installed atmos to ${atmosInstallPath}`);
   return atmosInstallPath;
 };
@@ -198,7 +192,6 @@ export const getAtmos = async (
   versionSpec: string,
   auth: string | undefined,
   arch = os.arch(),
-  installWrapper: boolean
 ): Promise<{ toolPath: string; info: IAtmosVersionInfo | null }> => {
   const osPlat: string = os.platform();
 
@@ -224,7 +217,7 @@ export const getAtmos = async (
 
   try {
     core.info(`Installing version ${resolvedVersion} from GitHub`);
-    toolPath = await installAtmosVersion(info, undefined, arch, installWrapper);
+    toolPath = await installAtmosVersion(info, undefined);
 
     if (osPlat != "win32") {
       toolPath = path.join(toolPath);

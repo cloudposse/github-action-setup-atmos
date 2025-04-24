@@ -10,12 +10,11 @@ export const run = async () => {
     core.info(`Setup atmos version spec ${versionSpec}`);
 
     const arch = core.getInput("architecture") || os.arch();
-    const installWrapper = core.getInput("install-wrapper") === "true";
 
     const token = core.getInput("token");
     const auth = !token ? undefined : `token ${token}`;
 
-    const { toolPath, info } = await installer.getAtmos(versionSpec, auth, arch, installWrapper);
+    const { toolPath, info } = await installer.getAtmos(versionSpec, auth, arch);
 
     core.info(`Successfully set up Atmos version ${versionSpec} in ${toolPath}`);
 
