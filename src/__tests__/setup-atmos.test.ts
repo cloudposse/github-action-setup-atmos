@@ -88,7 +88,7 @@ describe("Setup Atmos", () => {
     }
   );
 
-  it("installs atmos without wrapper", async () => {
+  it("installs atmos", async () => {
     setupSpies("latest", "1.15.0");
 
     const wrapperInstallMock = jest.spyOn(io, "cp");
