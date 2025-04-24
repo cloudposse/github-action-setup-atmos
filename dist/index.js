@@ -48887,7 +48887,8 @@ const findVersionMatch = (versionSpec, arch = external_os_default().arch(), cand
         const candidate = candidates[i];
         const version = makeSemver(candidate.name);
         core.debug(`[${candidate.name}] check ${version} satisfies ${versionSpec}`);
-        if (semver.satisfies(version, versionSpec) || (versionSpec == "latest" && !candidate.prerelease)) {
+        if (semver.satisfies(version, versionSpec) ||
+            (versionSpec == "latest" && !candidate.prerelease)) {
             atmosFile = candidate.assets.find((file) => {
                 core.debug(`${file.arch}===${archFilter} && ${file.os}===${platFilter}`);
                 return file.arch === archFilter && file.os === platFilter;
