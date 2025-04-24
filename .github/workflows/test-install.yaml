@@ -50,12 +50,6 @@ jobs:
           expected: 'rc'
           actual: "${{ needs.test.outputs.latest }}"
           comparison: 'notContains'
-          
-      - uses: nick-fields/assert-action@v1
-        with:
-          expected: 'v1.172.0-rc.1'
-          actual: "${{ needs.test.outputs.rc }}"
-          comparison: 'exact'
       - uses: nick-fields/assert-action@v1
         with:
           expected: 'v1.172.0'
@@ -65,4 +59,9 @@ jobs:
         with:
           expected: 'v1.172.0'
           actual: "${{ needs.test.outputs.semver-constraint }}"
+          comparison: 'exact'
+      - uses: nick-fields/assert-action@v1
+        with:
+          expected: 'v1.172.0-rc.1'
+          actual: "${{ needs.test.outputs.rc }}"
           comparison: 'exact'
