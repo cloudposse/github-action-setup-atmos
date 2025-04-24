@@ -40,6 +40,7 @@ jobs:
 
       - name: permissions
         run: |
+          ls -al /home/runner/work/github-action-setup-atmos/atmos
           chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos
           chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos-bin
           cat -v /home/runner/work/github-action-setup-atmos/atmos/atmos
