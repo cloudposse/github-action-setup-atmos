@@ -1,8 +1,9 @@
 
 
 <!-- markdownlint-disable -->
-# github-action-setup-atmos <a href="https://cpco.io/homepage?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/github-action-setup-atmos&utm_content="><img align="right" src="https://cloudposse.com/logo-300x69.svg" width="150" /></a>
-<a href="https://github.com/cloudposse/github-action-setup-atmos/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/github-action-setup-atmos.svg" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/badge.svg" alt="Slack Community"/></a>
+<a href="https://cpco.io/homepage"><img src="https://github.com/cloudposse/github-action-setup-atmos/blob/main/.github/banner.png?raw=true" alt="Project Banner"/></a><br/>
+    <p align="right">
+<a href="https://github.com/cloudposse/github-action-setup-atmos/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/github-action-setup-atmos.svg" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/badge.svg" alt="Slack Community"/></a></p>
 <!-- markdownlint-restore -->
 
 <!--
@@ -60,7 +61,7 @@ steps:
   - name: Setup atmos
     uses: cloudposse/github-action-setup-atmos@v2
     with:
-      atmos-version: 0.15.0
+      version: 0.15.0
 ````
 
 The wrapper script installation can be skipped by setting the `install-wrapper` input to `false`:
@@ -210,7 +211,7 @@ All other trademarks referenced herein are the property of their respective owne
 
 
 ---
-Copyright © 2017-2024 [Cloud Posse, LLC](https://cpco.io/copyright)
+Copyright © 2017-2025 [Cloud Posse, LLC](https://cpco.io/copyright)
 
 
 <a href="https://cloudposse.com/readme/footer/link?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/github-action-setup-atmos&utm_content=readme_footer_link"><img alt="README footer" src="https://cloudposse.com/readme/footer/img"/></a>
