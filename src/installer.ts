@@ -18,8 +18,13 @@ import * as sys from "./system";
 // 1.13 => 1.13.0
 // 1.10beta1 => 1.10.0-beta.1, 1.10rc1 => 1.10.0-rc.1
 // 1.8.5beta1 => 1.8.5-beta.1, 1.8.5rc1 => 1.8.5-rc.1
+// 1.172.0-rc.1 => 1.172.0-rc.1
 export const makeSemver = (version: string): string => {
-  version = version.replace("beta", "-beta.").replace("rc", "-rc.").replace("--", "-");
+  version = version.replace("beta", "-beta.")
+    .replace("rc", "-rc.")
+    .replace("--", "-")
+    .replace("..", ".");
+  
   const parts = version.split("-");
 
   const semVersion = semver.coerce(parts[0])?.version;
