@@ -48943,35 +48943,8 @@ const getMatchingVersion = async (versionSpec, auth, arch) => {
         fileName: version.assets[0].name
     };
 };
-const installWrapperBin = async (atmosDownloadPath) => {
-    let source = "";
-    let destination = "";
-    try {
-        source = external_path_.resolve([__dirname, "..", "dist", "wrapper", "index.js"].join(external_path_.sep));
-        destination = [atmosDownloadPath, "atmos"].join(external_path_.sep);
-        core.info(`Installing wrapper script from ${source} to ${destination}.`);
-        // This is a hack to fix the line ending of the shebang, which for some unknown reason is being written as CR
-        // rather than LF
-        //
-        // await io.cp(source, destination);
-        const orig = (0,external_fs_.readFileSync)(source, "utf8");
-        const contents = `#!/usr/bin/env node\n\n${orig}`;
-        await (0,external_fs_.writeFileSync)(destination, contents, "utf8");
-        // end hack
-        // Make the wrapper script executable
-        external_fs_default().chmodSync(destination, 0o775);
-        // Export a new environment variable, so our wrapper can locate the binary
-        core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
-        return atmosDownloadPath;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }
-    catch (e) {
-        core.setFailed(`Unable to copy ${source} to ${destination}.`);
-        throw e;
-    }
-};
-const installAtmosVersion = async (info, auth, arch, installWrapper) => {
-    const atmosBinName = installWrapper ? getAtmosWrappedBinaryName() : getAtmosBinaryName();
+const installAtmosVersion = async (info, auth) => {
+    const atmosBinName = getAtmosBinaryName();
     const homeDir = external_path_.resolve([__dirname, "..", ".."].join(external_path_.sep));
     const atmosInstallPath = [homeDir, "atmos"].join(external_path_.sep);
     core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
@@ -48981,13 +48954,10 @@ const installAtmosVersion = async (info, auth, arch, installWrapper) => {
     await io.mv(downloadPath, toolPath);
     core.info(`Successfully renamed atmos from ${downloadPath} to ${toolPath}`);
     external_fs_default().chmodSync(toolPath, 0o775);
-    if (installWrapper) {
-        await installWrapperBin(atmosInstallPath);
-    }
     core.info(`Successfully installed atmos to ${atmosInstallPath}`);
     return atmosInstallPath;
 };
-const getAtmos = async (versionSpec, auth, arch = external_os_default().arch(), installWrapper) => {
+const getAtmos = async (versionSpec, auth, arch = external_os_default().arch()) => {
     const osPlat = external_os_default().platform();
     core.info(`Attempting to download ${versionSpec}...`);
     const info = await getMatchingVersion(versionSpec, auth, arch);
@@ -49005,7 +48975,7 @@ const getAtmos = async (versionSpec, auth, arch = external_os_default().arch(), 
     }
     try {
         core.info(`Installing version ${resolvedVersion} from GitHub`);
-        toolPath = await installAtmosVersion(info, undefined, arch, installWrapper);
+        toolPath = await installAtmosVersion(info, undefined);
         if (osPlat != "win32") {
             toolPath = external_path_.join(toolPath);
         }
@@ -49029,10 +48999,9 @@ const run = async () => {
         const versionSpec = core.getInput("atmos-version");
         core.info(`Setup atmos version spec ${versionSpec}`);
         const arch = core.getInput("architecture") || external_os_default().arch();
-        const installWrapper = core.getInput("install-wrapper") === "true";
         const token = core.getInput("token");
         const auth = !token ? undefined : `token ${token}`;
-        const { toolPath, info } = await getAtmos(versionSpec, auth, arch, installWrapper);
+        const { toolPath, info } = await getAtmos(versionSpec, auth, arch);
         core.info(`Successfully set up Atmos version ${versionSpec} in ${toolPath}`);
         core.setOutput("atmos-version", info?.resolvedVersion);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

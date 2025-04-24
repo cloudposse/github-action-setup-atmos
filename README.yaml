@@ -37,9 +37,7 @@ description: Install atmos for use in GitHub Actions
 
 introduction: |-
   This repo contains a GitHub Action to setup [atmos](https://github.com/cloudposse/atmos) for use in GitHub Actions. It 
-  installs the specified version of atmos and adds it to the `PATH` so it can be used in subsequent steps. In addition, 
-  it optionally installs a wrapper script that will capture the `stdout`, `stderr`, and `exitcode` of the `atmos` 
-  command and make them available to subsequent steps via outputs of the same name.
+  installs the specified version of atmos and adds it to the `PATH` so it can be used in subsequent steps. 
 references:
   - name: "github-actions-workflows"
     description: "Reusable workflows for different types of projects"
@@ -69,39 +67,6 @@ usage: |-
       with:
         version: 0.15.0
   ````
-
-  The wrapper script installation can be skipped by setting the `install-wrapper` input to `false`:
-
-  ```yaml
-  steps:
-    - uses: hashicorp/setup-terraform@v2
-
-    - name: Setup atmos
-      uses: cloudposse/github-action-setup-atmos@v2
-      with:
-        install-wrapper: false
-  ````
-
-  Subsequent steps of the GitHub action can use the wrapper scipt to capture the `stdout`, `stderr`, and `exitcode` if 
-  the wrapper script was installed:
-
-  ```yaml
-  steps:
-    - uses: hashicorp/setup-terraform@v2
-
-    - name: Setup atmos
-      uses: cloudposse/github-action-setup-atmos@v2
-      with:
-        install-wrapper: true
-
-    - name: Run atmos
-      id: atmos
-      run: atmos terraform plan
-
-    - run: echo ${{ steps.atmos.outputs.stdout }}
-    - run: echo ${{ steps.atmos.outputs.stderr }}
-    - run: echo ${{ steps.atmos.outputs.exitcode }}
-  ```
 
 include:
   - "docs/github-action.md"

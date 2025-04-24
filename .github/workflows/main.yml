@@ -32,18 +32,15 @@ jobs:
         run: |
           yarn clean
           yarn build
-          yarn build:wrapper
 
       - name: Integration Test
         uses: ./
         with:
           atmos-version: latest
-          install-wrapper: true
 
       - name: permissions
         run: |
           chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos
-          chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos-bin
           cat -v /home/runner/work/github-action-setup-atmos/atmos/atmos
 
       - name: atmos

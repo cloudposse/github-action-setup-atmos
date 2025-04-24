@@ -8,7 +8,7 @@ import * as tc from "@actions/tool-cache";
 import { Octokit } from "octokit";
 import * as semver from "semver";
 
-import { getAtmosBinaryName, getAtmosWrappedBinaryName } from "./atmos-bin";
+import { getAtmosBinaryName } from "./atmos-bin";
 import { IAtmosVersionInfo, IAtmosVersion, IAtmosVersionFile } from "./interfaces";
 import * as sys from "./system";
 
@@ -134,46 +134,8 @@ export const getMatchingVersion = async (
   };
 };
 
-export const installWrapperBin = async (atmosDownloadPath: string): Promise<string> => {
-  let source = "";
-  let destination = "";
-
-  try {
-    source = path.resolve([__dirname, "..", "dist", "wrapper", "index.js"].join(path.sep));
-    destination = [atmosDownloadPath, "atmos"].join(path.sep);
-
-    core.info(`Installing wrapper script from ${source} to ${destination}.`);
-
-    // This is a hack to fix the line ending of the shebang, which for some unknown reason is being written as CR
-    // rather than LF
-    //
-    // await io.cp(source, destination);
-    const orig = readFileSync(source, "utf8");
-    const contents = `#!/usr/bin/env node\n\n${orig}`;
-    await writeFileSync(destination, contents, "utf8");
-    // end hack
-
-    // Make the wrapper script executable
-    fs.chmodSync(destination, 0o775);
-
-    // Export a new environment variable, so our wrapper can locate the binary
-    core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
-
-    return atmosDownloadPath;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (e: any) {
-    core.setFailed(`Unable to copy ${source} to ${destination}.`);
-    throw e;
-  }
-};
-
-export const installAtmosVersion = async (
-  info: IAtmosVersionInfo,
-  auth: string | undefined,
-  arch: string,
-  installWrapper: boolean
-): Promise<string> => {
-  const atmosBinName = installWrapper ? getAtmosWrappedBinaryName() : getAtmosBinaryName();
+export const installAtmosVersion = async (info: IAtmosVersionInfo, auth: string | undefined): Promise<string> => {
+  const atmosBinName = getAtmosBinaryName();
 
   const homeDir = path.resolve([__dirname, "..", ".."].join(path.sep));
   const atmosInstallPath = [homeDir, "atmos"].join(path.sep);
@@ -188,10 +150,6 @@ export const installAtmosVersion = async (
 
   fs.chmodSync(toolPath, 0o775);
 
-  if (installWrapper) {
-    await installWrapperBin(atmosInstallPath);
-  }
-
   core.info(`Successfully installed atmos to ${atmosInstallPath}`);
   return atmosInstallPath;
 };
@@ -199,8 +157,7 @@ export const installAtmosVersion = async (
 export const getAtmos = async (
   versionSpec: string,
   auth: string | undefined,
-  arch = os.arch(),
-  installWrapper: boolean
+  arch = os.arch()
 ): Promise<{ toolPath: string; info: IAtmosVersionInfo | null }> => {
   const osPlat: string = os.platform();
 
@@ -226,7 +183,7 @@ export const getAtmos = async (
 
   try {
     core.info(`Installing version ${resolvedVersion} from GitHub`);
-    toolPath = await installAtmosVersion(info, undefined, arch, installWrapper);
+    toolPath = await installAtmosVersion(info, undefined);
 
     if (osPlat != "win32") {
       toolPath = path.join(toolPath);
