@@ -32,13 +32,11 @@ jobs:
         run: |
           yarn clean
           yarn build
-          yarn build:wrapper
 
       - name: Integration Test
         uses: ./
         with:
           atmos-version: latest
-          install-wrapper: true
 
       - name: permissions
         run: |
