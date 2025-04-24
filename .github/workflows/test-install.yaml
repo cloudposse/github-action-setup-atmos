@@ -1,6 +1,10 @@
-name: Test example positive
+name: Test Downloading Atmos
 on:
   workflow_dispatch: {}
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+    - main
 
 jobs:
   test:
@@ -14,11 +18,28 @@ jobs:
         uses: actions/checkout@v4
 
       - uses: ./
-        id: current
-
+        id: latest
+        with:
+          # default, but explicit for clarity
+          atmos-version: 'latest'
+      - uses: ./
+        id: rc
+        with:
+          atmos-version: 'v1.172.0-rc.1'
+      - uses: ./
+        id: full-release
+        with:
+          atmos-version: 'v1.172.0'
+      - uses: ./
+        id: semver-constraint
+        with:
+          atmos-version: '<=1.172.0'
 
     outputs:
-      result: "${{ steps.current.outputs.atmos-version }}"
+      latest: "${{ steps.latest.outputs.atmos-version }}"
+      rc: "${{ steps.rc.outputs.atmos-version }}"
+      full-release: "${{ steps.full-release.outputs.atmos-version }}"
+      semver-constraint: "${{ steps.semver-constraint.outputs.atmos-version }}"
 
   assert:
     runs-on: ubuntu-latest
@@ -26,5 +47,22 @@ jobs:
     steps:
       - uses: nick-fields/assert-action@v1
         with:
-          expected: 'true'
-          actual: "${{ needs.test.outputs.result }}"
+          expected: 'rc'
+          actual: "${{ needs.test.outputs.latest }}"
+          comparison: 'notContains'
+          
+      - uses: nick-fields/assert-action@v1
+        with:
+          expected: 'v1.172.0-rc.1'
+          actual: "${{ needs.test.outputs.rc }}"
+          comparison: 'exact'
+      - uses: nick-fields/assert-action@v1
+        with:
+          expected: 'v1.172.0'
+          actual: "${{ needs.test.outputs.full-release }}"
+          comparison: 'exact'
+      - uses: nick-fields/assert-action@v1
+        with:
+          expected: 'v1.172.0'
+          actual: "${{ needs.test.outputs.semver-constraint }}"
+          comparison: 'exact'
