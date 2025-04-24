@@ -134,10 +134,7 @@ export const getMatchingVersion = async (
   };
 };
 
-export const installAtmosVersion = async (
-  info: IAtmosVersionInfo,
-  auth: string | undefined,
-): Promise<string> => {
+export const installAtmosVersion = async (info: IAtmosVersionInfo, auth: string | undefined): Promise<string> => {
   const atmosBinName = getAtmosBinaryName();
 
   const homeDir = path.resolve([__dirname, "..", ".."].join(path.sep));
@@ -160,7 +157,7 @@ export const installAtmosVersion = async (
 export const getAtmos = async (
   versionSpec: string,
   auth: string | undefined,
-  arch = os.arch(),
+  arch = os.arch()
 ): Promise<{ toolPath: string; info: IAtmosVersionInfo | null }> => {
   const osPlat: string = os.platform();
 
