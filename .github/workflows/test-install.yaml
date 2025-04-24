@@ -1,10 +1,6 @@
 name: Test Downloading Atmos
 on:
   workflow_dispatch: {}
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-    - main
 
 jobs:
   test:
