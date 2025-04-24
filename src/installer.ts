@@ -60,7 +60,10 @@ export const findVersionMatch = (
     const version = makeSemver(candidate.name);
 
     core.debug(`check ${version} satisfies ${versionSpec}`);
-    if (semver.satisfies(version, versionSpec) || (versionSpec == "latest" && !candidate.name.toLowerCase().includes("rc"))) {
+    if (
+      semver.satisfies(version, versionSpec) ||
+      (versionSpec == "latest" && !candidate.name.toLowerCase().includes("rc"))
+    ) {
       atmosFile = candidate.assets.find((file) => {
         core.debug(`${file.arch}===${archFilter} && ${file.os}===${platFilter}`);
 
