@@ -2,8 +2,11 @@
 
 <!-- markdownlint-disable -->
 <a href="https://cpco.io/homepage"><img src="https://github.com/cloudposse/github-action-setup-atmos/blob/main/.github/banner.png?raw=true" alt="Project Banner"/></a><br/>
-    <p align="right">
-<a href="https://github.com/cloudposse/github-action-setup-atmos/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/github-action-setup-atmos.svg" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/badge.svg" alt="Slack Community"/></a></p>
+
+
+<p align="right"><a href="https://github.com/cloudposse/github-action-setup-atmos/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/github-action-setup-atmos.svg?style=for-the-badge" alt="Latest Release"/></a><a href="https://github.com/cloudposse/github-action-setup-atmos/commits"><img src="https://img.shields.io/github/last-commit/cloudposse/github-action-setup-atmos.svg?style=for-the-badge" alt="Last Updated"/></a><a href="https://cloudposse.com/slack"><img src="https://slack.cloudposse.com/for-the-badge.svg" alt="Slack Community"/></a>
+
+</p>
 <!-- markdownlint-restore -->
 
 <!--
@@ -102,23 +105,10 @@ steps:
 
 
 
-<!-- markdownlint-disable -->
-
-## Inputs
-
-| Name | Description | Default | Required |
-|------|-------------|---------|----------|
-| atmos-version | Version Spec of the version to use. Examples: 1.x, 10.15.1, >=10.15.0. | latest | false |
-| install-wrapper | Flag to indicate if the wrapper script will be installed to wrap subsequent calls of the `atmos` binary and expose its STDOUT, STDERR, and exit code as outputs named `stdout`, `stderr`, and `exitcode` respectively. Defaults to `true`. | true | false |
-| token | Used to pull atmos distributions from Cloud Posse's GitHub repository. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting. | ${{ github.server\_url == 'https://github.com' && github.token \|\| '' }} | false |
 
 
-## Outputs
 
-| Name | Description |
-|------|-------------|
-| atmos-version | The installed atmos version. |
-<!-- markdownlint-restore -->
+
 
 
 ## Related Projects
