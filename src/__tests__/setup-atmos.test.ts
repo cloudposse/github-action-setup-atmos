@@ -46,27 +46,21 @@ describe("Setup Atmos", () => {
     jest.spyOn(os, "arch").mockReturnValue(arch);
     jest.spyOn(fs, "renameSync").mockReturnValue();
     jest.spyOn(fs, "chmodSync").mockReturnValue();
-    jest.spyOn(fs, "readFileSync").mockReturnValue("mock wrapper content");
-    jest.spyOn(fs, "writeFileSync").mockReturnValue();
     jest.spyOn(cp, "execSync").mockReturnValue(expectedVersion);
-    jest.spyOn(tc, "find").mockReturnValue("");  // Not in cache
-    jest.spyOn(tc, "cacheDir").mockResolvedValue("atmos");
-    jest.spyOn(io, "mkdirP").mockResolvedValue();
-    jest.spyOn(io, "cp").mockResolvedValue();
-    jest.spyOn(io, "rmRF").mockResolvedValue();
-    jest.spyOn(core, "addPath").mockReturnValue();
-    jest.spyOn(core, "exportVariable").mockReturnValue();
+    jest.spyOn(tc, "cacheDir").mockResolvedValueOnce("atmos");
+    jest.spyOn(io, "mkdirP").mockResolvedValueOnce();
+    jest.spyOn(io, "cp").mockResolvedValueOnce();
+    jest.spyOn(io, "rmRF").mockResolvedValueOnce();
 
     jest
       .spyOn(tc, "downloadTool")
-      .mockResolvedValue(`atmos_${expectedVersion}_${platform}_${arch}`);
+      .mockResolvedValueOnce(`atmos_${expectedVersion}_${platform}_${arch}`);
 
     jest
       .spyOn(core, "getInput")
       .mockReturnValueOnce(versionSpec) // atmos-version
       .mockReturnValueOnce("") // architecture
-      .mockReturnValueOnce(installWrapper ? "true" : "false") // install-wrapper
-      .mockReturnValueOnce(""); // token
+      .mockReturnValueOnce(installWrapper ? "true" : "false"); // install-wrapper
   };
 
   it.each`

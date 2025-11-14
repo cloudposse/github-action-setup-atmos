@@ -48795,16 +48795,14 @@ __nccwpck_require__.r(__webpack_exports__);
 var external_os_ = __nccwpck_require__(2037);
 var external_os_default = /*#__PURE__*/__nccwpck_require__.n(external_os_);
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var lib_core = __nccwpck_require__(2186);
+var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: external "fs"
 var external_fs_ = __nccwpck_require__(7147);
 var external_fs_default = /*#__PURE__*/__nccwpck_require__.n(external_fs_);
 // EXTERNAL MODULE: external "path"
 var external_path_ = __nccwpck_require__(1017);
-// EXTERNAL MODULE: external "child_process"
-var external_child_process_ = __nccwpck_require__(2081);
 // EXTERNAL MODULE: ./node_modules/@actions/io/lib/io.js
-var lib_io = __nccwpck_require__(7436);
+var io = __nccwpck_require__(7436);
 // EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
 var tool_cache = __nccwpck_require__(7784);
 // EXTERNAL MODULE: ./node_modules/octokit/dist-node/index.js
@@ -48854,7 +48852,6 @@ const getAtmosWrappedPath = () => [process.env.ATMOS_CLI_PATH, getAtmosWrappedBi
 
 
 
-
 //
 // Convert version syntax into semver for semver matching
 // 1.13.1 => 1.13.1
@@ -48878,34 +48875,6 @@ const makeSemver = (version) => {
     }
     return fullVersion;
 };
-//
-// Check if atmos is already installed in PATH and get its version
-//
-const checkExistingAtmosInstallation = async () => {
-    try {
-        // Use io.which to find atmos in PATH
-        const atmosPath = await io.which("atmos", false);
-        if (!atmosPath) {
-            return null;
-        }
-        core.info(`Found existing atmos installation at ${atmosPath}`);
-        // Get the version
-        const versionOutput = execSync("atmos version", { encoding: "utf8" }).trim();
-        // Parse version from output (format may vary, typically includes version number)
-        const versionMatch = versionOutput.match(/(\d+\.\d+\.\d+(-[\w.]+)?)/);
-        if (versionMatch) {
-            const installedVersion = versionMatch[1];
-            core.info(`Existing atmos version: ${installedVersion}`);
-            return installedVersion;
-        }
-        return null;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }
-    catch (error) {
-        core.debug(`No existing atmos installation found: ${error.message}`);
-        return null;
-    }
-};
 const findVersionMatch = (versionSpec, arch = external_os_default().arch(), candidates) => {
     const archFilter = getArch(arch);
     const platFilter = getPlatform();
@@ -48918,14 +48887,14 @@ const findVersionMatch = (versionSpec, arch = external_os_default().arch(), cand
     for (let i = 0; i < candidates.length; i++) {
         const candidate = candidates[i];
         const version = makeSemver(candidate.name);
-        lib_core.debug(`[${candidate.name}] check ${version} satisfies ${versionSpec}`);
+        core.debug(`[${candidate.name}] check ${version} satisfies ${versionSpec}`);
         if (semver.satisfies(version, versionSpec) || (versionSpec == "latest" && !candidate.prerelease)) {
             atmosFile = candidate.assets.find((file) => {
-                lib_core.debug(`${file.arch}===${archFilter} && ${file.os}===${platFilter}`);
+                core.debug(`${file.arch}===${archFilter} && ${file.os}===${platFilter}`);
                 return file.arch === archFilter && file.os === platFilter;
             });
             if (atmosFile) {
-                lib_core.debug(`matched ${candidate.name}`);
+                core.debug(`matched ${candidate.name}`);
                 match = candidate;
                 break;
             }
@@ -48980,7 +48949,7 @@ const installWrapperBin = async (atmosDownloadPath) => {
     try {
         source = __nccwpck_require__.ab + "index1.js";
         destination = [atmosDownloadPath, "atmos"].join(external_path_.sep);
-        lib_core.info(`Installing wrapper script from ${source} to ${destination}.`);
+        core.info(`Installing wrapper script from ${source} to ${destination}.`);
         // This is a hack to fix the line ending of the shebang, which for some unknown reason is being written as CR
         // rather than LF
         //
@@ -48992,12 +48961,12 @@ const installWrapperBin = async (atmosDownloadPath) => {
         // Make the wrapper script executable
         external_fs_default().chmodSync(destination, 0o775);
         // Export a new environment variable, so our wrapper can locate the binary
-        lib_core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
+        core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
         return atmosDownloadPath;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
     catch (e) {
-        lib_core.setFailed(`Unable to copy ${source} to ${destination}.`);
+        core.setFailed(`Unable to copy ${source} to ${destination}.`);
         throw e;
     }
 };
@@ -49005,28 +48974,25 @@ const installAtmosVersion = async (info, auth, arch, installWrapper) => {
     const atmosBinName = installWrapper ? getAtmosWrappedBinaryName() : getAtmosBinaryName();
     const homeDir = external_path_.resolve([__dirname, "..", ".."].join(external_path_.sep));
     const atmosInstallPath = [homeDir, "atmos"].join(external_path_.sep);
-    lib_core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
+    core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
     const downloadPath = await tool_cache.downloadTool(info.downloadUrl, undefined, auth);
     const toolPath = external_path_.join(atmosInstallPath, atmosBinName);
-    lib_core.info("Installing downloaded file...");
+    core.info("Installing downloaded file...");
     // Use copy + delete instead of mv/rename to handle cross-device installations
     // This fixes EXDEV errors in Docker-in-Docker and other containerized environments
-    await lib_io.cp(downloadPath, toolPath);
-    await lib_io.rmRF(downloadPath);
-    lib_core.info(`Successfully installed atmos from ${downloadPath} to ${toolPath}`);
+    await io.cp(downloadPath, toolPath);
+    await io.rmRF(downloadPath);
+    core.info(`Successfully installed atmos from ${downloadPath} to ${toolPath}`);
     external_fs_default().chmodSync(toolPath, 0o775);
     if (installWrapper) {
         await installWrapperBin(atmosInstallPath);
     }
-    lib_core.info(`Successfully installed atmos to ${atmosInstallPath}`);
+    core.info(`Successfully installed atmos to ${atmosInstallPath}`);
     return atmosInstallPath;
 };
 const getAtmos = async (versionSpec, auth, arch = external_os_default().arch(), installWrapper) => {
     const osPlat = external_os_default().platform();
-    // TODO: Add detection for pre-installed atmos in a future PR
-    // For now, always download to avoid test environment issues
-    // const existingVersion = await checkExistingAtmosInstallation();
-    lib_core.info(`Attempting to download ${versionSpec}...`);
+    core.info(`Attempting to download ${versionSpec}...`);
     const info = await getMatchingVersion(versionSpec, auth, arch);
     if (!info) {
         throw new Error(`Unable to find atmos version '${versionSpec}' for platform ${osPlat} and architecture ${arch}.`);
@@ -49036,23 +49002,23 @@ const getAtmos = async (versionSpec, auth, arch = external_os_default().arch(), 
     let toolPath;
     toolPath = tool_cache.find("atmos", resolvedVersion, arch);
     if (toolPath) {
-        lib_core.info(`Found in cache @ ${toolPath}`);
-        lib_core.addPath(toolPath);
+        core.info(`Found in cache @ ${toolPath}`);
+        core.addPath(toolPath);
         return { toolPath, info };
     }
     try {
-        lib_core.info(`Installing version ${resolvedVersion} from GitHub`);
+        core.info(`Installing version ${resolvedVersion} from GitHub`);
         toolPath = await installAtmosVersion(info, undefined, arch, installWrapper);
         if (osPlat != "win32") {
             toolPath = external_path_.join(toolPath);
         }
         const cachedDir = await tool_cache.cacheDir(toolPath, "atmos", resolvedVersion, arch);
-        lib_core.info(`Cached version ${resolvedVersion} for ${arch} in ${cachedDir}`);
-        lib_core.addPath(toolPath);
+        core.info(`Cached version ${resolvedVersion} for ${arch} in ${cachedDir}`);
+        core.addPath(toolPath);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
     catch (err) {
-        lib_core.setFailed(err);
+        core.setFailed(err);
     }
     return { toolPath, info };
 };
@@ -49063,19 +49029,19 @@ const getAtmos = async (versionSpec, auth, arch = external_os_default().arch(), 
 
 const run = async () => {
     try {
-        const versionSpec = lib_core.getInput("atmos-version");
-        lib_core.info(`Setup atmos version spec ${versionSpec}`);
-        const arch = lib_core.getInput("architecture") || external_os_default().arch();
-        const installWrapper = lib_core.getInput("install-wrapper") === "true";
-        const token = lib_core.getInput("token");
+        const versionSpec = core.getInput("atmos-version");
+        core.info(`Setup atmos version spec ${versionSpec}`);
+        const arch = core.getInput("architecture") || external_os_default().arch();
+        const installWrapper = core.getInput("install-wrapper") === "true";
+        const token = core.getInput("token");
         const auth = !token ? undefined : `token ${token}`;
         const { toolPath, info } = await getAtmos(versionSpec, auth, arch, installWrapper);
-        lib_core.info(`Successfully set up Atmos version ${versionSpec} in ${toolPath}`);
-        lib_core.setOutput("atmos-version", info?.resolvedVersion);
+        core.info(`Successfully set up Atmos version ${versionSpec} in ${toolPath}`);
+        core.setOutput("atmos-version", info?.resolvedVersion);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
     catch (error) {
-        lib_core.error(error);
+        core.error(error);
     }
 };
 

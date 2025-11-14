@@ -1,7 +1,6 @@
 import fs, { readFileSync, writeFileSync } from "fs";
 import os from "os";
 import * as path from "path";
-import { execSync } from "child_process";
 
 import * as core from "@actions/core";
 import * as io from "@actions/io";
@@ -40,38 +39,6 @@ export const makeSemver = (version: string): string => {
     throw new Error(`The version: ${version} can't be changed to SemVer notation`);
   }
   return fullVersion;
-};
-
-//
-// Check if atmos is already installed in PATH and get its version
-//
-export const checkExistingAtmosInstallation = async (): Promise<string | null> => {
-  try {
-    // Use io.which to find atmos in PATH
-    const atmosPath = await io.which("atmos", false);
-    if (!atmosPath) {
-      return null;
-    }
-
-    core.info(`Found existing atmos installation at ${atmosPath}`);
-
-    // Get the version
-    const versionOutput = execSync("atmos version", { encoding: "utf8" }).trim();
-    // Parse version from output (format may vary, typically includes version number)
-    const versionMatch = versionOutput.match(/(\d+\.\d+\.\d+(-[\w.]+)?)/);
-
-    if (versionMatch) {
-      const installedVersion = versionMatch[1];
-      core.info(`Existing atmos version: ${installedVersion}`);
-      return installedVersion;
-    }
-
-    return null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    core.debug(`No existing atmos installation found: ${error.message}`);
-    return null;
-  }
 };
 
 export const findVersionMatch = (
@@ -239,10 +206,6 @@ export const getAtmos = async (
   installWrapper: boolean
 ): Promise<{ toolPath: string; info: IAtmosVersionInfo | null }> => {
   const osPlat: string = os.platform();
-
-  // TODO: Add detection for pre-installed atmos in a future PR
-  // For now, always download to avoid test environment issues
-  // const existingVersion = await checkExistingAtmosInstallation();
 
   core.info(`Attempting to download ${versionSpec}...`);
 
