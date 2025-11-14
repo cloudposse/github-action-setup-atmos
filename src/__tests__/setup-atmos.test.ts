@@ -22,10 +22,11 @@ jest.mock("@actions/tool-cache");
 jest.mock("os");
 
 describe("Setup Atmos", () => {
-  beforeAll(async () => {
-    // Load the fixture once for all tests
-    nockBack.setMode("lockdown");
-    await nockBack("atmosReleases.json");
+  let nockDoneCb: () => void;
+  beforeEach(async () => {
+    // This loads a fixture from __fixtures__ that mocks the GitHub API's response to the calls made by the action.
+    const { nockDone } = await nockBack("atmosReleases.json");
+    nockDoneCb = nockDone;
   });
 
   afterEach(async () => {
@@ -87,6 +88,7 @@ describe("Setup Atmos", () => {
       const setOutputMock = jest.spyOn(core, "setOutput");
 
       await run();
+      nockDoneCb();
 
       expect(setOutputMock).toHaveBeenCalled();
       expect(setOutputMock).toHaveBeenCalledWith(
@@ -100,6 +102,7 @@ describe("Setup Atmos", () => {
     setupSpies("latest", "1.15.0", false);
 
     await run();
+    nockDoneCb();
 
     // io.cp should be called once for the binary (not for wrapper since installWrapper=false)
     expect(io.cp).toHaveBeenCalledTimes(1);
@@ -111,6 +114,7 @@ describe("Setup Atmos", () => {
     setupSpies("latest", "1.15.0", true);
 
     await run();
+    nockDoneCb();
 
     // io.cp should be called twice: once for binary to atmos-bin, once for wrapper to atmos
     expect(io.cp).toHaveBeenCalledTimes(2);
