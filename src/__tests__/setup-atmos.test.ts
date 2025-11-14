@@ -50,16 +50,16 @@ describe("Setup Atmos", () => {
     jest.spyOn(fs, "writeFileSync").mockReturnValue();
     jest.spyOn(cp, "execSync").mockReturnValue(expectedVersion);
     jest.spyOn(tc, "find").mockReturnValue("");  // Not in cache
-    jest.spyOn(tc, "cacheDir").mockResolvedValueOnce("atmos");
-    jest.spyOn(io, "mkdirP").mockResolvedValueOnce();
-    jest.spyOn(io, "cp").mockResolvedValueOnce();
-    jest.spyOn(io, "rmRF").mockResolvedValueOnce();
+    jest.spyOn(tc, "cacheDir").mockResolvedValue("atmos");
+    jest.spyOn(io, "mkdirP").mockResolvedValue();
+    jest.spyOn(io, "cp").mockResolvedValue();
+    jest.spyOn(io, "rmRF").mockResolvedValue();
     jest.spyOn(core, "addPath").mockReturnValue();
     jest.spyOn(core, "exportVariable").mockReturnValue();
 
     jest
       .spyOn(tc, "downloadTool")
-      .mockResolvedValueOnce(`atmos_${expectedVersion}_${platform}_${arch}`);
+      .mockResolvedValue(`atmos_${expectedVersion}_${platform}_${arch}`);
 
     jest
       .spyOn(core, "getInput")

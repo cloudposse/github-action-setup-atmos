@@ -77,4 +77,5 @@ typings/
 build-harness
 
 # Mac DS_Store files
-.DS_Store
+.DS_Store.claude-flow/
+.hive-mind/
