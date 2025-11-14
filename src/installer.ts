@@ -1,6 +1,7 @@
 import fs, { readFileSync, writeFileSync } from "fs";
 import os from "os";
 import * as path from "path";
+import { execSync } from "child_process";
 
 import * as core from "@actions/core";
 import * as io from "@actions/io";
@@ -39,6 +40,38 @@ export const makeSemver = (version: string): string => {
     throw new Error(`The version: ${version} can't be changed to SemVer notation`);
   }
   return fullVersion;
+};
+
+//
+// Check if atmos is already installed in PATH and get its version
+//
+export const checkExistingAtmosInstallation = async (): Promise<string | null> => {
+  try {
+    // Use io.which to find atmos in PATH
+    const atmosPath = await io.which("atmos", false);
+    if (!atmosPath) {
+      return null;
+    }
+
+    core.info(`Found existing atmos installation at ${atmosPath}`);
+
+    // Get the version
+    const versionOutput = execSync("atmos version", { encoding: "utf8" }).trim();
+    // Parse version from output (format may vary, typically includes version number)
+    const versionMatch = versionOutput.match(/(\d+\.\d+\.\d+(-[\w.]+)?)/);
+
+    if (versionMatch) {
+      const installedVersion = versionMatch[1];
+      core.info(`Existing atmos version: ${installedVersion}`);
+      return installedVersion;
+    }
+
+    return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    core.debug(`No existing atmos installation found: ${error.message}`);
+    return null;
+  }
 };
 
 export const findVersionMatch = (
@@ -182,9 +215,12 @@ export const installAtmosVersion = async (
   const downloadPath = await tc.downloadTool(info.downloadUrl, undefined, auth);
   const toolPath = path.join(atmosInstallPath, atmosBinName);
 
-  core.info("Renaming downloaded file...");
-  await io.mv(downloadPath, toolPath);
-  core.info(`Successfully renamed atmos from ${downloadPath} to ${toolPath}`);
+  core.info("Installing downloaded file...");
+  // Use copy + delete instead of mv/rename to handle cross-device installations
+  // This fixes EXDEV errors in Docker-in-Docker and other containerized environments
+  await io.cp(downloadPath, toolPath);
+  await io.rmRF(downloadPath);
+  core.info(`Successfully installed atmos from ${downloadPath} to ${toolPath}`);
 
   fs.chmodSync(toolPath, 0o775);
 
@@ -203,6 +239,33 @@ export const getAtmos = async (
   installWrapper: boolean
 ): Promise<{ toolPath: string; info: IAtmosVersionInfo | null }> => {
   const osPlat: string = os.platform();
+
+  // Check if atmos is already installed in PATH
+  const existingVersion = await checkExistingAtmosInstallation();
+  if (existingVersion) {
+    try {
+      const semverVersion = makeSemver(existingVersion);
+      if (semver.satisfies(semverVersion, versionSpec) || versionSpec === "latest") {
+        core.info(`Using existing atmos installation (version ${existingVersion}) which satisfies ${versionSpec}`);
+        const atmosPath = await io.which("atmos", true);
+        const atmosDir = path.dirname(atmosPath);
+
+        // Create info object for existing installation
+        const info: IAtmosVersionInfo = {
+          downloadUrl: "",
+          resolvedVersion: existingVersion,
+          fileName: ""
+        };
+
+        return { toolPath: atmosDir, info };
+      } else {
+        core.info(`Existing atmos version ${existingVersion} does not satisfy ${versionSpec}, will download required version`);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      core.debug(`Could not use existing installation: ${error.message}`);
+    }
+  }
 
   core.info(`Attempting to download ${versionSpec}...`);
 
