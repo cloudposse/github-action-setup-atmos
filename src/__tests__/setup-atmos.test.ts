@@ -1,3 +1,4 @@
+import cp from "child_process";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -22,22 +23,13 @@ jest.mock("os");
 
 describe("Setup Atmos", () => {
   let nockDoneCb: () => void;
-
-  beforeAll(async () => {
+  beforeEach(async () => {
     // This loads a fixture from __fixtures__ that mocks the GitHub API's response to the calls made by the action.
-    // We load it once for all tests since the fixture data is the same for all test cases
     const { nockDone } = await nockBack("atmosReleases.json");
     nockDoneCb = nockDone;
   });
 
-  afterAll(() => {
-    // Clean up nock after all tests complete
-    if (nockDoneCb) {
-      nockDoneCb();
-    }
-  });
-
-  afterEach(() => {
+  afterEach(async () => {
     jest.clearAllMocks();
     jest.resetAllMocks();
   });
@@ -52,20 +44,22 @@ describe("Setup Atmos", () => {
 
     jest.spyOn(os, "platform").mockReturnValue(platform);
     jest.spyOn(os, "arch").mockReturnValue(arch);
+    jest.spyOn(fs, "renameSync").mockReturnValue();
     jest.spyOn(fs, "chmodSync").mockReturnValue();
     jest.spyOn(fs, "readFileSync").mockReturnValue("mock wrapper content");
     jest.spyOn(fs, "writeFileSync").mockReturnValue();
-    jest.spyOn(tc, "find").mockReturnValue(""); // Not in cache
-    jest.spyOn(tc, "cacheDir").mockResolvedValue("atmos");
-    jest.spyOn(io, "mkdirP").mockResolvedValue();
-    jest.spyOn(io, "cp").mockResolvedValue();
-    jest.spyOn(io, "rmRF").mockResolvedValue();
+    jest.spyOn(cp, "execSync").mockReturnValue(expectedVersion);
+    jest.spyOn(tc, "find").mockReturnValue("");  // Not in cache
+    jest.spyOn(tc, "cacheDir").mockResolvedValueOnce("atmos");
+    jest.spyOn(io, "mkdirP").mockResolvedValueOnce();
+    jest.spyOn(io, "cp").mockResolvedValueOnce();
+    jest.spyOn(io, "rmRF").mockResolvedValueOnce();
     jest.spyOn(core, "addPath").mockReturnValue();
     jest.spyOn(core, "exportVariable").mockReturnValue();
 
     jest
       .spyOn(tc, "downloadTool")
-      .mockResolvedValue(`atmos_${expectedVersion}_${platform}_${arch}`);
+      .mockResolvedValueOnce(`atmos_${expectedVersion}_${platform}_${arch}`);
 
     jest
       .spyOn(core, "getInput")
@@ -93,6 +87,7 @@ describe("Setup Atmos", () => {
       const setOutputMock = jest.spyOn(core, "setOutput");
 
       await run();
+      nockDoneCb();
 
       expect(setOutputMock).toHaveBeenCalled();
       expect(setOutputMock).toHaveBeenCalledWith(
@@ -106,29 +101,32 @@ describe("Setup Atmos", () => {
     setupSpies("latest", "1.15.0", false);
 
     await run();
+    nockDoneCb();
 
-    // io.cp should be called once for the binary (not for wrapper since installWrapper=false)
-    expect(io.cp).toHaveBeenCalledTimes(1);
-    // io.rmRF should be called once to clean up the downloaded temp file
-    expect(io.rmRF).toHaveBeenCalledTimes(1);
+    // With the fix, io.cp is called once for the binary (replacing io.mv)
+    expect(io.cp).toHaveBeenCalledWith(
+      "atmos_1.15.0_linux_amd64",
+      [path.resolve(__dirname, "..", "..", ".."), "atmos", "atmos"].join(path.sep)
+    );
+    // io.rmRF should be called to clean up the temp file
+    expect(io.rmRF).toHaveBeenCalledWith("atmos_1.15.0_linux_amd64");
   });
 
   it("installs atmos with wrapper", async () => {
     setupSpies("latest", "1.15.0", true);
 
     await run();
+    nockDoneCb();
 
-    // io.cp should be called twice: once for binary to atmos-bin, once for wrapper to atmos
-    expect(io.cp).toHaveBeenCalledTimes(2);
-    // io.rmRF should be called once to clean up the downloaded temp file
-    expect(io.rmRF).toHaveBeenCalledTimes(1);
-    // Verify the binary was copied to the atmos-bin path (wrapped version)
+    // With wrapper, io.cp is called for the binary (to atmos-bin)
     expect(io.cp).toHaveBeenCalledWith(
       "atmos_1.15.0_linux_amd64",
       [path.resolve(__dirname, "..", "..", ".."), "atmos", "atmos-bin"].join(
         path.sep
       )
     );
+    // io.rmRF should be called to clean up the temp file
+    expect(io.rmRF).toHaveBeenCalledWith("atmos_1.15.0_linux_amd64");
   });
 });
 
