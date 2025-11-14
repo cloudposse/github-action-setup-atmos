@@ -183,6 +183,8 @@ export const installAtmosVersion = async (
   const toolPath = path.join(atmosInstallPath, atmosBinName);
 
   core.info("Installing downloaded file...");
+  // Ensure the destination directory exists
+  await io.mkdirP(atmosInstallPath);
   // Use copy + delete instead of mv/rename to handle cross-device installations
   // This fixes EXDEV errors in Docker-in-Docker and other containerized environments
   await io.cp(downloadPath, toolPath);
