@@ -23,13 +23,22 @@ jest.mock("os");
 
 describe("Setup Atmos", () => {
   let nockDoneCb: () => void;
-  beforeEach(async () => {
+
+  beforeAll(async () => {
     // This loads a fixture from __fixtures__ that mocks the GitHub API's response to the calls made by the action.
+    // We load it once for all tests since the fixture data is the same for all test cases
     const { nockDone } = await nockBack("atmosReleases.json");
     nockDoneCb = nockDone;
   });
 
-  afterEach(async () => {
+  afterAll(() => {
+    // Clean up nock after all tests complete
+    if (nockDoneCb) {
+      nockDoneCb();
+    }
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
     jest.resetAllMocks();
   });
@@ -44,23 +53,20 @@ describe("Setup Atmos", () => {
 
     jest.spyOn(os, "platform").mockReturnValue(platform);
     jest.spyOn(os, "arch").mockReturnValue(arch);
-    jest.spyOn(fs, "renameSync").mockReturnValue();
     jest.spyOn(fs, "chmodSync").mockReturnValue();
     jest.spyOn(fs, "readFileSync").mockReturnValue("mock wrapper content");
     jest.spyOn(fs, "writeFileSync").mockReturnValue();
-    jest.spyOn(cp, "execSync").mockReturnValue(expectedVersion);
     jest.spyOn(tc, "find").mockReturnValue(""); // Not in cache
-    jest.spyOn(tc, "cacheDir").mockResolvedValueOnce("atmos");
-    jest.spyOn(io, "mkdirP").mockResolvedValueOnce();
+    jest.spyOn(tc, "cacheDir").mockResolvedValue("atmos");
+    jest.spyOn(io, "mkdirP").mockResolvedValue();
     jest.spyOn(io, "cp").mockResolvedValue();
     jest.spyOn(io, "rmRF").mockResolvedValue();
-    jest.spyOn(io, "which").mockResolvedValue(""); // No existing installation
     jest.spyOn(core, "addPath").mockReturnValue();
     jest.spyOn(core, "exportVariable").mockReturnValue();
 
     jest
       .spyOn(tc, "downloadTool")
-      .mockResolvedValueOnce(`atmos_${expectedVersion}_${platform}_${arch}`);
+      .mockResolvedValue(`atmos_${expectedVersion}_${platform}_${arch}`);
 
     jest
       .spyOn(core, "getInput")
@@ -88,7 +94,6 @@ describe("Setup Atmos", () => {
       const setOutputMock = jest.spyOn(core, "setOutput");
 
       await run();
-      nockDoneCb();
 
       expect(setOutputMock).toHaveBeenCalled();
       expect(setOutputMock).toHaveBeenCalledWith(
@@ -102,7 +107,6 @@ describe("Setup Atmos", () => {
     setupSpies("latest", "1.15.0", false);
 
     await run();
-    nockDoneCb();
 
     // io.cp should be called once for the binary (not for wrapper since installWrapper=false)
     expect(io.cp).toHaveBeenCalledTimes(1);
@@ -114,7 +118,6 @@ describe("Setup Atmos", () => {
     setupSpies("latest", "1.15.0", true);
 
     await run();
-    nockDoneCb();
 
     // io.cp should be called twice: once for binary to atmos-bin, once for wrapper to atmos
     expect(io.cp).toHaveBeenCalledTimes(2);

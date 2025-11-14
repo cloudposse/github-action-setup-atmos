@@ -240,32 +240,9 @@ export const getAtmos = async (
 ): Promise<{ toolPath: string; info: IAtmosVersionInfo | null }> => {
   const osPlat: string = os.platform();
 
-  // Check if atmos is already installed in PATH
-  const existingVersion = await checkExistingAtmosInstallation();
-  if (existingVersion) {
-    try {
-      const semverVersion = makeSemver(existingVersion);
-      if (semver.satisfies(semverVersion, versionSpec) || versionSpec === "latest") {
-        core.info(`Using existing atmos installation (version ${existingVersion}) which satisfies ${versionSpec}`);
-        const atmosPath = await io.which("atmos", true);
-        const atmosDir = path.dirname(atmosPath);
-
-        // Create info object for existing installation
-        const info: IAtmosVersionInfo = {
-          downloadUrl: "",
-          resolvedVersion: existingVersion,
-          fileName: ""
-        };
-
-        return { toolPath: atmosDir, info };
-      } else {
-        core.info(`Existing atmos version ${existingVersion} does not satisfy ${versionSpec}, will download required version`);
-      }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      core.debug(`Could not use existing installation: ${error.message}`);
-    }
-  }
+  // TODO: Add detection for pre-installed atmos in a future PR
+  // For now, always download to avoid test environment issues
+  // const existingVersion = await checkExistingAtmosInstallation();
 
   core.info(`Attempting to download ${versionSpec}...`);
 
