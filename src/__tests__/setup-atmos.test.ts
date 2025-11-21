@@ -50,6 +50,7 @@ describe("Setup Atmos", () => {
     jest.spyOn(tc, "cacheDir").mockResolvedValueOnce("atmos");
     jest.spyOn(io, "mkdirP").mockResolvedValueOnce();
     jest.spyOn(io, "cp").mockResolvedValueOnce();
+    jest.spyOn(io, "rmRF").mockResolvedValueOnce();
 
     jest
       .spyOn(tc, "downloadTool")
@@ -93,28 +94,33 @@ describe("Setup Atmos", () => {
   it("installs atmos without wrapper", async () => {
     setupSpies("latest", "1.15.0", false);
 
-    const wrapperInstallMock = jest.spyOn(io, "cp");
-
     await run();
     nockDoneCb();
 
-    expect(wrapperInstallMock).not.toHaveBeenCalled();
+    // With the fix, io.cp is called once for the binary (replacing io.mv)
+    expect(io.cp).toHaveBeenCalledWith(
+      "atmos_1.15.0_linux_amd64",
+      [path.resolve(__dirname, "..", "..", ".."), "atmos", "atmos"].join(path.sep)
+    );
+    // io.rmRF should be called to clean up the temp file
+    expect(io.rmRF).toHaveBeenCalledWith("atmos_1.15.0_linux_amd64");
   });
 
   it("installs atmos with wrapper", async () => {
     setupSpies("latest", "1.15.0", true);
 
-    const wrapperInstallMock = jest.spyOn(io, "mv");
-
     await run();
     nockDoneCb();
 
-    expect(wrapperInstallMock).toHaveBeenCalledWith(
+    // With wrapper, io.cp is called for the binary (to atmos-bin)
+    expect(io.cp).toHaveBeenCalledWith(
       "atmos_1.15.0_linux_amd64",
       [path.resolve(__dirname, "..", "..", ".."), "atmos", "atmos-bin"].join(
         path.sep
       )
     );
+    // io.rmRF should be called to clean up the temp file
+    expect(io.rmRF).toHaveBeenCalledWith("atmos_1.15.0_linux_amd64");
   });
 });
 

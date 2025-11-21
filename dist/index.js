@@ -48977,9 +48977,14 @@ const installAtmosVersion = async (info, auth, arch, installWrapper) => {
     core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
     const downloadPath = await tool_cache.downloadTool(info.downloadUrl, undefined, auth);
     const toolPath = external_path_.join(atmosInstallPath, atmosBinName);
-    core.info("Renaming downloaded file...");
-    await io.mv(downloadPath, toolPath);
-    core.info(`Successfully renamed atmos from ${downloadPath} to ${toolPath}`);
+    core.info("Installing downloaded file...");
+    // Ensure the destination directory exists
+    await io.mkdirP(atmosInstallPath);
+    // Use copy + delete instead of mv/rename to handle cross-device installations
+    // This fixes EXDEV errors in Docker-in-Docker and other containerized environments
+    await io.cp(downloadPath, toolPath);
+    await io.rmRF(downloadPath);
+    core.info(`Successfully installed atmos from ${downloadPath} to ${toolPath}`);
     external_fs_default().chmodSync(toolPath, 0o775);
     if (installWrapper) {
         await installWrapperBin(atmosInstallPath);
