@@ -55,7 +55,7 @@ steps:
     uses: cloudposse/github-action-setup-atmos@v2
 ````
 
-To install a specific version of atmos, set the `version` input:
+To install a specific version of atmos, set the `atmos-version` input:
 
 ```yaml
 steps:
@@ -64,7 +64,7 @@ steps:
   - name: Setup atmos
     uses: cloudposse/github-action-setup-atmos@v2
     with:
-      version: 0.15.0
+      atmos-version: 0.15.0
 ````
 
 The wrapper script installation can be skipped by setting the `install-wrapper` input to `false`:
@@ -215,7 +215,7 @@ All other trademarks referenced herein are the property of their respective owne
 
 
 ---
-Copyright © 2017-2025 [Cloud Posse, LLC](https://cpco.io/copyright)
+Copyright © 2017-2026 [Cloud Posse, LLC](https://cpco.io/copyright)
 
 
 <a href="https://cloudposse.com/readme/footer/link?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/github-action-setup-atmos&utm_content=readme_footer_link"><img alt="README footer" src="https://cloudposse.com/readme/footer/img"/></a>
