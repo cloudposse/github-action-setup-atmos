@@ -40,7 +40,7 @@ describe("Setup Atmos", () => {
     installWrapper = true
   ) => {
     const platform = "linux";
-    const arch = "amd64";
+    const arch = "x64";
 
     jest.spyOn(os, "platform").mockReturnValue(platform);
     jest.spyOn(os, "arch").mockReturnValue(arch);
@@ -54,7 +54,7 @@ describe("Setup Atmos", () => {
 
     jest
       .spyOn(tc, "downloadTool")
-      .mockResolvedValueOnce(`atmos_${expectedVersion}_${platform}_${arch}`);
+      .mockResolvedValueOnce(`atmos_${expectedVersion}_${platform}_amd64`);
 
     jest
       .spyOn(core, "getInput")

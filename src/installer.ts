@@ -43,7 +43,7 @@ export const makeSemver = (version: string): string => {
 
 export const findVersionMatch = (
   versionSpec: string,
-  arch = os.arch(),
+  arch: string = os.arch(),
   candidates: IAtmosVersion[] | null
 ): IAtmosVersion | undefined => {
   const archFilter = sys.getArch(arch);
@@ -204,7 +204,7 @@ export const installAtmosVersion = async (
 export const getAtmos = async (
   versionSpec: string,
   auth: string | undefined,
-  arch = os.arch(),
+  arch: string = os.arch(),
   installWrapper: boolean
 ): Promise<{ toolPath: string; info: IAtmosVersionInfo | null }> => {
   const osPlat: string = os.platform();
