@@ -8,6 +8,12 @@ inputs:
   atmos-version:
     description: "Version Spec of the version to use. Examples: 1.x, 10.15.1, >=10.15.0."
     default: "latest"
+  atmos-version-file:
+    description:
+      Path to a file that declares the atmos version to use. Supports the asdf/mise `.tool-versions` format (an `atmos
+      <version>` line) and a plain version file whose contents are the version (e.g. `.atmos-version`). When both
+      `atmos-version` and `atmos-version-file` are set, `atmos-version` takes precedence.
+    required: false
   install-wrapper:
     description:
       Flag to indicate if the wrapper script will be installed to wrap subsequent calls of the `atmos` binary and expose

@@ -453,6 +453,7 @@ describe("Setup Atmos", () => {
         .spyOn(core, "getInput")
         .mockReturnValueOnce("latest")
         .mockReturnValueOnce("")
+        .mockReturnValueOnce("")
         .mockReturnValueOnce("false")
         .mockReturnValueOnce("");
       jest.spyOn(os, "arch").mockReturnValue("x64");
@@ -471,6 +472,7 @@ describe("Setup Atmos", () => {
         .spyOn(core, "getInput")
         .mockReturnValueOnce("latest")
         .mockReturnValueOnce("")
+        .mockReturnValueOnce("")
         .mockReturnValueOnce("true")
         .mockReturnValueOnce("");
       jest.spyOn(os, "arch").mockReturnValue("x64");
@@ -485,6 +487,7 @@ describe("Setup Atmos", () => {
       jest
         .spyOn(core, "getInput")
         .mockReturnValueOnce("latest")
+        .mockReturnValueOnce("")
         .mockReturnValueOnce("arm64")
         .mockReturnValueOnce("true")
         .mockReturnValueOnce("enforce")

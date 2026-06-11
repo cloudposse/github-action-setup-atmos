@@ -67,6 +67,22 @@ steps:
       atmos-version: 0.15.0
 ````
 
+The version can also be read from a file with the `atmos-version-file` input. This supports the asdf/mise
+`.tool-versions` format (an `atmos <version>` line) as well as a plain version file whose contents are the version
+(e.g. `.atmos-version`):
+
+```yaml
+steps:
+  - uses: hashicorp/setup-terraform@v2
+
+  - name: Setup atmos
+    uses: cloudposse/github-action-setup-atmos@v2
+    with:
+      atmos-version-file: .tool-versions
+````
+
+When both `atmos-version` and `atmos-version-file` are set, `atmos-version` takes precedence.
+
 The wrapper script installation can be skipped by setting the `install-wrapper` input to `false`:
 
 ```yaml
@@ -114,6 +130,7 @@ steps:
 | Name | Description | Default | Required |
 |------|-------------|---------|----------|
 | atmos-version | Version Spec of the version to use. Examples: 1.x, 10.15.1, >=10.15.0. | latest | false |
+| atmos-version-file | Path to a file that declares the atmos version to use. Supports the asdf/mise `.tool-versions` format (an `atmos <version>` line) and a plain version file whose contents are the version (e.g. `.atmos-version`). When both `atmos-version` and `atmos-version-file` are set, `atmos-version` takes precedence. |  | false |
 | checksum-validation | Controls SHA256SUMS validation. Use `warn` to validate when checksums are published and warn when they are missing, `enforce` to fail when checksums are missing, or `skip` to disable checksum validation. Checksum mismatches always fail when validation runs. | warn | false |
 | install-wrapper | Flag to indicate if the wrapper script will be installed to wrap subsequent calls of the `atmos` binary and expose its STDOUT, STDERR, and exit code as outputs named `stdout`, `stderr`, and `exitcode` respectively. Defaults to `true`. | true | false |
 | token | Used to pull atmos distributions from Cloud Posse's GitHub repository. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting. | ${{ github.server\_url == 'https://github.com' && github.token \|\| '' }} | false |

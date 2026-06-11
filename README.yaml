@@ -73,6 +73,22 @@ usage: |-
         atmos-version: 0.15.0
   ````
 
+  The version can also be read from a file with the `atmos-version-file` input. This supports the asdf/mise
+  `.tool-versions` format (an `atmos <version>` line) as well as a plain version file whose contents are the version
+  (e.g. `.atmos-version`):
+
+  ```yaml
+  steps:
+    - uses: hashicorp/setup-terraform@v2
+
+    - name: Setup atmos
+      uses: cloudposse/github-action-setup-atmos@v2
+      with:
+        atmos-version-file: .tool-versions
+  ````
+
+  When both `atmos-version` and `atmos-version-file` are set, `atmos-version` takes precedence.
+
   The wrapper script installation can be skipped by setting the `install-wrapper` input to `false`:
 
   ```yaml
