@@ -322,6 +322,26 @@ describe("Setup Atmos", () => {
       expect(io.cp).toHaveBeenCalledWith("downloaded-atmos", path.join(atmosInstallPath, "atmos"));
     });
 
+    it("removes the downloaded file when checksum verification fails", async () => {
+      setupInstallSpies("linux");
+      jest.spyOn(tc, "downloadTool").mockResolvedValueOnce("downloaded-atmos").mockResolvedValueOnce("checksums");
+      mockReadFileSync((filePath) => {
+        if (filePath === "checksums") {
+          return "0000000000000000000000000000000000000000000000000000000000000000  atmos_1.222.0_linux_amd64";
+        }
+
+        return Buffer.from("payload");
+      });
+
+      await expect(
+        installer.installAtmosVersion(versionInfoWithChecksum, "token test-token", "x64", false)
+      ).rejects.toThrow("Checksum mismatch");
+
+      expect(io.rmRF).toHaveBeenCalledWith("checksums");
+      expect(io.rmRF).toHaveBeenCalledWith("downloaded-atmos");
+      expect(io.cp).not.toHaveBeenCalled();
+    });
+
     it("skips checksum verification when configured", async () => {
       setupInstallSpies("linux");
 

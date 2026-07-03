@@ -65,5 +65,7 @@ export const runWrapper = async () => {
 };
 
 if (require.main === module) {
-  runWrapper();
+  void runWrapper().catch((err) => {
+    core.setFailed(err);
+  });
 }
