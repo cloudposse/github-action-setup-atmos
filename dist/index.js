@@ -48857,7 +48857,7 @@ const getAtmosWrappedPath = () => [process.env.ATMOS_CLI_PATH, getAtmosWrappedBi
 
 
 const WRAPPED_TOOL_CACHE_NAME = "atmos-wrapper";
-const UNWRAPPED_TOOL_CACHE_NAME = "atmos";
+const UNWRAPPED_TOOL_CACHE_NAME = "atmos-native";
 const WINDOWS_WRAPPER_NAME = "atmos-wrapper.js";
 const WINDOWS_COMMAND_SHIM_NAME = "atmos.cmd";
 const getChecksumsAssetName = (tagName) => `atmos_${tagName.replace(/^v/, "")}_SHA256SUMS`;

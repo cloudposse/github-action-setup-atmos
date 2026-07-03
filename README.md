@@ -83,7 +83,7 @@ SHA256SUMS validation defaults to `warn`, which validates when checksums are pub
 Set `checksum-validation` to `enforce` to fail when checksums are missing, or `skip` to disable checksum validation.
 Checksum mismatches always fail when validation runs.
 
-Subsequent steps of the GitHub action can use the wrapper scipt to capture the `stdout`, `stderr`, and `exitcode` if 
+Subsequent steps of the GitHub action can use the wrapper script to capture the `stdout`, `stderr`, and `exitcode` if
 the wrapper script was installed:
 
 ```yaml

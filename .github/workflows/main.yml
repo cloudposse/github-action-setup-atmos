@@ -2,14 +2,15 @@ on:
   workflow_dispatch:
   pull_request:
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v6
         with:
@@ -45,6 +46,8 @@ jobs:
 
       - name: Commit and push generated build artifacts
         if: github.event_name != 'pull_request' && github.ref_type == 'branch'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           if git diff --quiet -- dist; then
             echo "No generated build artifact changes."
@@ -55,11 +58,14 @@ jobs:
           git config user.email "actions@github.com"
           git add dist
           git commit -m "chore: [skip-ci] generate build artifacts"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          auth_header="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 | tr -d '\n')"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic ${auth_header}" push origin "HEAD:${GITHUB_REF_NAME}"
 
   integration:
     name: Integration (${{ matrix.os }}, wrapper=${{ matrix.install-wrapper }})
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -72,6 +78,8 @@ jobs:
           - "true"
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup Atmos
         uses: ./
@@ -85,13 +93,20 @@ jobs:
 
       - name: Verify outputs are available
         if: matrix.install-wrapper == 'true'
+        env:
+          ATMOS_STDOUT: ${{ steps.atmos.outputs.stdout }}
+          ATMOS_STDERR: ${{ steps.atmos.outputs.stderr }}
+          ATMOS_EXITCODE: ${{ steps.atmos.outputs.exitcode }}
+        shell: bash
         run: |
-          echo "stdout: ${{ steps.atmos.outputs.stdout }}"
-          echo "stderr: ${{ steps.atmos.outputs.stderr }}"
-          echo "exitcode: ${{ steps.atmos.outputs.exitcode }}"
+          printf 'stdout: %s\n' "$ATMOS_STDOUT"
+          printf 'stderr: %s\n' "$ATMOS_STDERR"
+          printf 'exitcode: %s\n' "$ATMOS_EXITCODE"
 
   major-release-tagger:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: cloudposse/github-action-major-release-tagger@v2
         with:

@@ -32,6 +32,10 @@ jest.mock("octokit", () => ({
 const repoParent = path.resolve(__dirname, "..", "..", "..");
 const atmosInstallPath = path.join(repoParent, "atmos");
 
+const mockReadFileSync = (implementation: (filePath: fs.PathOrFileDescriptor) => string | Buffer) => {
+  jest.spyOn(fs, "readFileSync").mockImplementation(implementation as unknown as typeof fs.readFileSync);
+};
+
 const versionInfo: IAtmosVersionInfo = {
   downloadUrl: "https://example.test/atmos",
   resolvedVersion: "v1.222.0",
@@ -246,7 +250,7 @@ describe("Setup Atmos", () => {
     });
 
     it("verifies a downloaded file against SHA256SUMS", () => {
-      jest.spyOn(fs, "readFileSync").mockImplementation((filePath) => {
+      mockReadFileSync((filePath) => {
         if (filePath === "checksums") {
           return "239f59ed55e737c77147cf55ad0c1b030b6d7ee748a7426952f9b852d5a935e5  atmos_1.222.0_linux_amd64";
         }
@@ -260,7 +264,7 @@ describe("Setup Atmos", () => {
     });
 
     it("rejects checksum mismatches", () => {
-      jest.spyOn(fs, "readFileSync").mockImplementation((filePath) => {
+      mockReadFileSync((filePath) => {
         if (filePath === "checksums") {
           return "0000000000000000000000000000000000000000000000000000000000000000  atmos_1.222.0_linux_amd64";
         }
@@ -298,7 +302,7 @@ describe("Setup Atmos", () => {
     it("verifies checksums before installing", async () => {
       setupInstallSpies("linux");
       jest.spyOn(tc, "downloadTool").mockResolvedValueOnce("downloaded-atmos").mockResolvedValueOnce("checksums");
-      jest.spyOn(fs, "readFileSync").mockImplementation((filePath) => {
+      mockReadFileSync((filePath) => {
         if (filePath === "checksums") {
           return "239f59ed55e737c77147cf55ad0c1b030b6d7ee748a7426952f9b852d5a935e5  atmos_1.222.0_linux_amd64";
         }
@@ -387,7 +391,7 @@ describe("Setup Atmos", () => {
     it("uses the native cache namespace without wrapper", async () => {
       await installer.getAtmos("latest", undefined, "x64", false);
 
-      expect(tc.find).toHaveBeenCalledWith("atmos", "v1.222.0", "x64");
+      expect(tc.find).toHaveBeenCalledWith("atmos-native", "v1.222.0", "x64");
       expect(core.addPath).toHaveBeenCalledWith("/cache/atmos");
       expect(core.exportVariable).not.toHaveBeenCalled();
     });
@@ -408,7 +412,7 @@ describe("Setup Atmos", () => {
       jest.spyOn(io, "cp").mockResolvedValue();
       jest.spyOn(io, "rmRF").mockResolvedValue();
       jest.spyOn(fs, "chmodSync").mockReturnValue();
-      jest.spyOn(fs, "readFileSync").mockImplementation((filePath) => {
+      mockReadFileSync((filePath) => {
         if (filePath === "checksums") {
           return "239f59ed55e737c77147cf55ad0c1b030b6d7ee748a7426952f9b852d5a935e5  atmos_1.222.0_linux_amd64";
         }
@@ -418,7 +422,7 @@ describe("Setup Atmos", () => {
 
       await installer.getAtmos("latest", "token test-token", "x64", false, "warn");
 
-      expect(tc.cacheDir).toHaveBeenCalledWith(atmosInstallPath, "atmos", "v1.222.0", "x64");
+      expect(tc.cacheDir).toHaveBeenCalledWith(atmosInstallPath, "atmos-native", "v1.222.0", "x64");
       expect(core.addPath).toHaveBeenCalledWith("/cache/atmos");
     });
   });
