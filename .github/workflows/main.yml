@@ -6,9 +6,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: package.json
           cache: yarn
@@ -31,6 +31,9 @@ jobs:
           yarn build
           yarn build:wrapper
 
+      - name: Verify build artifacts are committed
+        run: git diff --exit-code -- dist
+
   integration:
     name: Integration (${{ matrix.os }}, wrapper=${{ matrix.install-wrapper }})
     runs-on: ${{ matrix.os }}
@@ -45,7 +48,7 @@ jobs:
           - "false"
           - "true"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Atmos
         uses: ./
@@ -67,6 +70,6 @@ jobs:
   major-release-tagger:
     runs-on: ubuntu-latest
     steps:
-      - uses: cloudposse/github-action-major-release-tagger@v1
+      - uses: cloudposse/github-action-major-release-tagger@v2
         with:
           dry-run: 'true'

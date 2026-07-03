@@ -19,7 +19,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - uses: ./
         id: latest
@@ -49,22 +49,22 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test]
     steps:
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v4
         with:
           expected: 'rc'
           actual: "${{ needs.test.outputs.latest }}"
           comparison: 'notContains'
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v4
         with:
           expected: 'v1.172.0'
           actual: "${{ needs.test.outputs.full-release }}"
           comparison: 'exact'
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v4
         with:
           expected: 'v1.172.0'
           actual: "${{ needs.test.outputs.semver-constraint }}"
           comparison: 'exact'
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v4
         with:
           expected: 'v1.172.0-rc.1'
           actual: "${{ needs.test.outputs.rc }}"
