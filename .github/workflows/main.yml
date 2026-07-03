@@ -31,13 +31,6 @@ jobs:
           yarn build
           yarn build:wrapper
 
-      - name: Commit and Push Changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          committer_name: GitHub Action
-          # https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/
-          message: "chore: [skip-ci] format code and generate build artifacts"
-
   integration:
     name: Integration (${{ matrix.os }}, wrapper=${{ matrix.install-wrapper }})
     runs-on: ${{ matrix.os }}
