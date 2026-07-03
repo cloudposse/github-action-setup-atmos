@@ -1,3 +1,5 @@
+name: CI
+
 on:
   workflow_dispatch:
   pull_request:
@@ -5,13 +7,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: package.json
           cache: yarn
@@ -20,13 +25,13 @@ jobs:
         run: yarn --frozen-lockfile --prefer-offline
 
       - name: Linting
-        run: yarn lint
+        run: yarn lint:check
 
       - name: Format Source Code
-        run: yarn format
+        run: yarn format:check
 
       - name: Unit Tests
-        run: yarn test
+        run: yarn test:coverage
 
       - name: Build
         run: |
@@ -34,37 +39,81 @@ jobs:
           yarn build
           yarn build:wrapper
 
-      - name: Integration Test
+      - name: Verify build artifacts are committed
+        if: github.event_name == 'pull_request'
+        run: |
+          if ! git diff --quiet -- dist; then
+            echo "::error::Generated dist artifacts are stale. Run 'yarn clean && yarn build && yarn build:wrapper' and commit dist/."
+            git diff --name-only -- dist
+            exit 1
+          fi
+
+      - name: Commit and push generated build artifacts
+        if: github.event_name != 'pull_request' && github.ref_type == 'branch'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- dist; then
+            echo "No generated build artifact changes."
+            exit 0
+          fi
+
+          git config user.name "GitHub Action"
+          git config user.email "actions@github.com"
+          git add dist
+          git commit -m "chore: [skip-ci] generate build artifacts"
+          auth_header="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 | tr -d '\n')"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic ${auth_header}" push origin "HEAD:${GITHUB_REF_NAME}"
+
+  integration:
+    name: Integration (${{ matrix.os }}, wrapper=${{ matrix.install-wrapper }})
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        install-wrapper:
+          - "false"
+          - "true"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Setup Atmos
         uses: ./
         with:
           atmos-version: latest
-          install-wrapper: true
+          install-wrapper: ${{ matrix.install-wrapper }}
 
-      - name: permissions
-        run: |
-          chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos
-          chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos-bin
-          cat -v /home/runner/work/github-action-setup-atmos/atmos/atmos
-
-      - name: atmos
+      - name: Run Atmos
         id: atmos
         run: atmos version
 
       - name: Verify outputs are available
+        if: matrix.install-wrapper == 'true'
+        env:
+          ATMOS_STDOUT: ${{ steps.atmos.outputs.stdout }}
+          ATMOS_STDERR: ${{ steps.atmos.outputs.stderr }}
+          ATMOS_EXITCODE: ${{ steps.atmos.outputs.exitcode }}
+        shell: bash
         run: |
-          echo "stdout: ${{ steps.atmos.outputs.stdout }}"
-          echo "stderr: ${{ steps.atmos.outputs.stderr }}"
-          echo "exitcode: ${{ steps.atmos.outputs.exitcode }}"
+          printf 'stdout: %s\n' "$ATMOS_STDOUT"
+          printf 'stderr: %s\n' "$ATMOS_STDERR"
+          printf 'exitcode: %s\n' "$ATMOS_EXITCODE"
 
-      - name: Commit and Push Changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          committer_name: GitHub Action
-          # https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/
-          message: "chore: [skip-ci] format code and generate build artifacts"
   major-release-tagger:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: cloudposse/github-action-major-release-tagger@v1
+      - uses: cloudposse/github-action-major-release-tagger@v2
         with:
           dry-run: 'true'

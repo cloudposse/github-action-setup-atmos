@@ -15,6 +15,13 @@ inputs:
       `true`.
     default: "true"
     required: false
+  checksum-validation:
+    description:
+      Controls SHA256SUMS validation. Use `warn` to validate when checksums are published and warn when they are missing,
+      `enforce` to fail when checksums are missing, or `skip` to disable checksum validation. Checksum mismatches always
+      fail when validation runs.
+    default: "warn"
+    required: false
   token:
     description:
       Used to pull atmos distributions from Cloud Posse's GitHub repository. Since there's a default, this is typically
@@ -27,4 +34,3 @@ outputs:
 runs:
   using: "node24"
   main: "dist/index.js"
-

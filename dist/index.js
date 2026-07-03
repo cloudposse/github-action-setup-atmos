@@ -48796,6 +48796,9 @@ var external_os_ = __nccwpck_require__(2037);
 var external_os_default = /*#__PURE__*/__nccwpck_require__.n(external_os_);
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(2186);
+// EXTERNAL MODULE: external "crypto"
+var external_crypto_ = __nccwpck_require__(6113);
+var external_crypto_default = /*#__PURE__*/__nccwpck_require__.n(external_crypto_);
 // EXTERNAL MODULE: external "fs"
 var external_fs_ = __nccwpck_require__(7147);
 var external_fs_default = /*#__PURE__*/__nccwpck_require__.n(external_fs_);
@@ -48852,6 +48855,13 @@ const getAtmosWrappedPath = () => [process.env.ATMOS_CLI_PATH, getAtmosWrappedBi
 
 
 
+
+const WRAPPED_TOOL_CACHE_NAME = "atmos-wrapper";
+const UNWRAPPED_TOOL_CACHE_NAME = "atmos-native";
+const WINDOWS_WRAPPER_NAME = "atmos-wrapper.js";
+const WINDOWS_COMMAND_SHIM_NAME = "atmos.cmd";
+const getChecksumsAssetName = (tagName) => `atmos_${tagName.replace(/^v/, "")}_SHA256SUMS`;
+const CHECKSUM_VALIDATION_MODES = ["warn", "enforce", "skip"];
 //
 // Convert version syntax into semver for semver matching
 // 1.13.1 => 1.13.1
@@ -48874,6 +48884,79 @@ const makeSemver = (version) => {
         throw new Error(`The version: ${version} can't be changed to SemVer notation`);
     }
     return fullVersion;
+};
+const parseAtmosReleaseAsset = (assetName, browserDownloadUrl) => {
+    const match = assetName.match(/^atmos_(.+)_(darwin|freebsd|linux|windows)_([^.]+?)(\.exe)?$/);
+    if (!match) {
+        return undefined;
+    }
+    const [, , assetOs, assetArch, extension] = match;
+    if ((assetOs === "windows") !== (extension === ".exe")) {
+        return undefined;
+    }
+    return {
+        name: assetName,
+        os: assetOs,
+        arch: assetArch,
+        browser_download_url: browserDownloadUrl
+    };
+};
+const parseChecksumValidationMode = (mode) => {
+    const normalizedMode = mode?.trim().toLowerCase() || "warn";
+    if (!CHECKSUM_VALIDATION_MODES.includes(normalizedMode)) {
+        throw new Error(`Invalid checksum-validation mode '${mode}'. Expected one of: warn, enforce, skip.`);
+    }
+    return normalizedMode;
+};
+const getToolCacheName = (installWrapper) => installWrapper ? WRAPPED_TOOL_CACHE_NAME : UNWRAPPED_TOOL_CACHE_NAME;
+const configureInstalledPath = (toolPath, installWrapper) => {
+    if (installWrapper) {
+        core.exportVariable("ATMOS_CLI_PATH", toolPath);
+    }
+    core.addPath(toolPath);
+};
+const getExpectedChecksum = (checksums, fileName) => {
+    const checksumLine = checksums
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .find((line) => line.endsWith(` ${fileName}`) || line.endsWith(` *${fileName}`));
+    if (!checksumLine) {
+        throw new Error(`Unable to find checksum for ${fileName}.`);
+    }
+    const [checksum] = checksumLine.split(/\s+/);
+    if (!/^[a-fA-F0-9]{64}$/.test(checksum)) {
+        throw new Error(`Invalid SHA256 checksum for ${fileName}.`);
+    }
+    return checksum.toLowerCase();
+};
+const verifyChecksum = (filePath, checksumsPath, fileName) => {
+    const expectedChecksum = getExpectedChecksum((0,external_fs_.readFileSync)(checksumsPath, "utf8"), fileName);
+    const actualChecksum = external_crypto_default().createHash("sha256").update((0,external_fs_.readFileSync)(filePath)).digest("hex");
+    if (actualChecksum !== expectedChecksum) {
+        throw new Error(`Checksum mismatch for ${fileName}.`);
+    }
+    core.info(`Verified SHA256 checksum for ${fileName}.`);
+};
+const verifyDownloadedTool = async (info, downloadPath, auth, checksumValidation) => {
+    if (checksumValidation === "skip") {
+        core.info(`Skipping checksum verification for ${info.fileName}.`);
+        return;
+    }
+    if (!info.checksumsUrl) {
+        const message = `No SHA256SUMS asset found for ${info.resolvedVersion}; skipping checksum verification.`;
+        if (checksumValidation === "enforce") {
+            throw new Error(message);
+        }
+        core.warning(message);
+        return;
+    }
+    const checksumsPath = await tool_cache.downloadTool(info.checksumsUrl, undefined, auth);
+    try {
+        verifyChecksum(downloadPath, checksumsPath, info.fileName);
+    }
+    finally {
+        await io.rmRF(checksumsPath);
+    }
 };
 const findVersionMatch = (versionSpec, arch = external_os_default().arch(), candidates) => {
     const archFilter = getArch(arch);
@@ -48918,14 +49001,13 @@ const getVersionsFromGitHubReleases = async (auth) => {
             if (!tag_name) {
                 throw new Error(`Release tag is empty`);
             }
-            const assets = r.assets.map((asset) => {
+            const assets = r.assets.flatMap((asset) => {
                 const { name, browser_download_url } = asset;
-                const parts = asset.name.split("_");
-                const os = parts[2];
-                const arch = parts[3];
-                return { name, os, arch, browser_download_url };
+                const atmosAsset = parseAtmosReleaseAsset(name, browser_download_url);
+                return atmosAsset ? [atmosAsset] : [];
             });
-            const version = { name: tag_name, prerelease, assets };
+            const checksumsUrl = r.assets.find((asset) => asset.name === getChecksumsAssetName(tag_name))?.browser_download_url;
+            const version = { name: tag_name, prerelease, assets, checksumsUrl };
             versions.push(version);
         });
     }
@@ -48940,7 +49022,8 @@ const getMatchingVersion = async (versionSpec, auth, arch) => {
     return {
         downloadUrl: version.assets[0].browser_download_url,
         resolvedVersion: version.name,
-        fileName: version.assets[0].name
+        fileName: version.assets[0].name,
+        checksumsUrl: version.checksumsUrl
     };
 };
 const installWrapperBin = async (atmosDownloadPath) => {
@@ -48948,19 +49031,28 @@ const installWrapperBin = async (atmosDownloadPath) => {
     let destination = "";
     try {
         source = external_path_.resolve([__dirname, "..", "dist", "wrapper", "index.js"].join(external_path_.sep));
-        destination = [atmosDownloadPath, "atmos"].join(external_path_.sep);
-        core.info(`Installing wrapper script from ${source} to ${destination}.`);
-        // This is a hack to fix the line ending of the shebang, which for some unknown reason is being written as CR
-        // rather than LF
-        //
-        // await io.cp(source, destination);
         const orig = (0,external_fs_.readFileSync)(source, "utf8");
-        const contents = `#!/usr/bin/env node\n\n${orig}`;
-        await (0,external_fs_.writeFileSync)(destination, contents, "utf8");
-        // end hack
-        // Make the wrapper script executable
-        external_fs_default().chmodSync(destination, 0o775);
-        // Export a new environment variable, so our wrapper can locate the binary
+        if (isWindows()) {
+            destination = external_path_.join(atmosDownloadPath, WINDOWS_WRAPPER_NAME);
+            const shimDestination = external_path_.join(atmosDownloadPath, WINDOWS_COMMAND_SHIM_NAME);
+            core.info(`Installing wrapper script from ${source} to ${destination}.`);
+            (0,external_fs_.writeFileSync)(destination, orig, "utf8");
+            core.info(`Installing Windows command shim to ${shimDestination}.`);
+            (0,external_fs_.writeFileSync)(shimDestination, `@echo off\r\nnode "%~dp0${WINDOWS_WRAPPER_NAME}" %*\r\n`, "utf8");
+        }
+        else {
+            destination = external_path_.join(atmosDownloadPath, "atmos");
+            core.info(`Installing wrapper script from ${source} to ${destination}.`);
+            // This is a hack to fix the line ending of the shebang, which for some unknown reason is being written as CR
+            // rather than LF
+            //
+            // await io.cp(source, destination);
+            const contents = `#!/usr/bin/env node\n\n${orig}`;
+            (0,external_fs_.writeFileSync)(destination, contents, "utf8");
+            // end hack
+            // Make the wrapper script executable
+            external_fs_default().chmodSync(destination, 0o775);
+        }
         core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
         return atmosDownloadPath;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48970,21 +49062,26 @@ const installWrapperBin = async (atmosDownloadPath) => {
         throw e;
     }
 };
-const installAtmosVersion = async (info, auth, arch, installWrapper) => {
+const installAtmosVersion = async (info, auth, arch, installWrapper, checksumValidation = "warn") => {
     const atmosBinName = installWrapper ? getAtmosWrappedBinaryName() : getAtmosBinaryName();
     const homeDir = external_path_.resolve([__dirname, "..", ".."].join(external_path_.sep));
     const atmosInstallPath = [homeDir, "atmos"].join(external_path_.sep);
     core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
     const downloadPath = await tool_cache.downloadTool(info.downloadUrl, undefined, auth);
     const toolPath = external_path_.join(atmosInstallPath, atmosBinName);
-    core.info("Installing downloaded file...");
-    // Ensure the destination directory exists
-    await io.mkdirP(atmosInstallPath);
-    // Use copy + delete instead of mv/rename to handle cross-device installations
-    // This fixes EXDEV errors in Docker-in-Docker and other containerized environments
-    await io.cp(downloadPath, toolPath);
-    await io.rmRF(downloadPath);
-    core.info(`Successfully installed atmos from ${downloadPath} to ${toolPath}`);
+    try {
+        await verifyDownloadedTool(info, downloadPath, auth, checksumValidation);
+        core.info("Installing downloaded file...");
+        // Ensure the destination directory exists
+        await io.mkdirP(atmosInstallPath);
+        // Use copy + delete instead of mv/rename to handle cross-device installations
+        // This fixes EXDEV errors in Docker-in-Docker and other containerized environments
+        await io.cp(downloadPath, toolPath);
+        core.info(`Successfully installed atmos from ${downloadPath} to ${toolPath}`);
+    }
+    finally {
+        await io.rmRF(downloadPath);
+    }
     external_fs_default().chmodSync(toolPath, 0o775);
     if (installWrapper) {
         await installWrapperBin(atmosInstallPath);
@@ -48992,7 +49089,7 @@ const installAtmosVersion = async (info, auth, arch, installWrapper) => {
     core.info(`Successfully installed atmos to ${atmosInstallPath}`);
     return atmosInstallPath;
 };
-const getAtmos = async (versionSpec, auth, arch = external_os_default().arch(), installWrapper) => {
+const getAtmos = async (versionSpec, auth, arch = external_os_default().arch(), installWrapper, checksumValidation = "warn") => {
     const osPlat = external_os_default().platform();
     core.info(`Attempting to download ${versionSpec}...`);
     const info = await getMatchingVersion(versionSpec, auth, arch);
@@ -49000,28 +49097,24 @@ const getAtmos = async (versionSpec, auth, arch = external_os_default().arch(), 
         throw new Error(`Unable to find atmos version '${versionSpec}' for platform ${osPlat} and architecture ${arch}.`);
     }
     const { resolvedVersion } = info;
+    const toolCacheName = getToolCacheName(installWrapper);
     // Check to see if the version is already in the local cache
     let toolPath;
-    toolPath = tool_cache.find("atmos", resolvedVersion, arch);
+    toolPath = tool_cache.find(toolCacheName, resolvedVersion, arch);
     if (toolPath) {
         core.info(`Found in cache @ ${toolPath}`);
-        core.addPath(toolPath);
+        configureInstalledPath(toolPath, installWrapper);
         return { toolPath, info };
     }
-    try {
-        core.info(`Installing version ${resolvedVersion} from GitHub`);
-        toolPath = await installAtmosVersion(info, undefined, arch, installWrapper);
-        if (osPlat != "win32") {
-            toolPath = external_path_.join(toolPath);
-        }
-        const cachedDir = await tool_cache.cacheDir(toolPath, "atmos", resolvedVersion, arch);
-        core.info(`Cached version ${resolvedVersion} for ${arch} in ${cachedDir}`);
-        core.addPath(toolPath);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    core.info(`Installing version ${resolvedVersion} from GitHub`);
+    toolPath = await installAtmosVersion(info, auth, arch, installWrapper, checksumValidation);
+    if (osPlat != "win32") {
+        toolPath = external_path_.join(toolPath);
     }
-    catch (err) {
-        core.setFailed(err);
-    }
+    const cachedDir = await tool_cache.cacheDir(toolPath, toolCacheName, resolvedVersion, arch);
+    core.info(`Cached version ${resolvedVersion} for ${arch} in ${cachedDir}`);
+    toolPath = cachedDir;
+    configureInstalledPath(toolPath, installWrapper);
     return { toolPath, info };
 };
 
@@ -49035,15 +49128,16 @@ const run = async () => {
         core.info(`Setup atmos version spec ${versionSpec}`);
         const arch = core.getInput("architecture") || external_os_default().arch();
         const installWrapper = core.getInput("install-wrapper") === "true";
+        const checksumValidation = parseChecksumValidationMode(core.getInput("checksum-validation"));
         const token = core.getInput("token");
         const auth = !token ? undefined : `token ${token}`;
-        const { toolPath, info } = await getAtmos(versionSpec, auth, arch, installWrapper);
+        const { toolPath, info } = await getAtmos(versionSpec, auth, arch, installWrapper, checksumValidation);
         core.info(`Successfully set up Atmos version ${versionSpec} in ${toolPath}`);
         core.setOutput("atmos-version", info?.resolvedVersion);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
     catch (error) {
-        core.error(error);
+        core.setFailed(error instanceof Error ? error.message : `${error}`);
     }
 };
 

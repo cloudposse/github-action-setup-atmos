@@ -11,17 +11,18 @@ export const run = async () => {
 
     const arch = core.getInput("architecture") || os.arch();
     const installWrapper = core.getInput("install-wrapper") === "true";
+    const checksumValidation = installer.parseChecksumValidationMode(core.getInput("checksum-validation"));
 
     const token = core.getInput("token");
     const auth = !token ? undefined : `token ${token}`;
 
-    const { toolPath, info } = await installer.getAtmos(versionSpec, auth, arch, installWrapper);
+    const { toolPath, info } = await installer.getAtmos(versionSpec, auth, arch, installWrapper, checksumValidation);
 
     core.info(`Successfully set up Atmos version ${versionSpec} in ${toolPath}`);
 
     core.setOutput("atmos-version", info?.resolvedVersion);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    core.error(error);
+    core.setFailed(error instanceof Error ? error.message : `${error}`);
   }
 };

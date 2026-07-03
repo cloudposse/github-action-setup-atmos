@@ -12,7 +12,8 @@
     "format:check": "prettier --check **/*.ts",
     "lint": "eslint --fix src/**/*.ts",
     "lint:check": "eslint src/**/*.ts",
-    "test": "jest"
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
