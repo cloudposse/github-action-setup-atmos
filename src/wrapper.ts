@@ -5,18 +5,18 @@ import * as io from "@actions/io";
 import { getAtmosWrappedPath } from "./atmos-bin";
 import { OutputListener } from "./output-listener";
 
-const pathToCLI = getAtmosWrappedPath();
-
-const guardAtmosInstalled = async () => {
+const guardAtmosInstalled = async (pathToCLI: string) => {
   // Setting check to `true` will cause `which` to throw if atmos isn't found
   return io.which(pathToCLI, true);
 };
 
-(async () => {
+export const runWrapper = async () => {
   try {
+    const pathToCLI = getAtmosWrappedPath();
+
     core.info("path: " + pathToCLI);
     // This will fail if Atmos isn't found, which is what we want
-    await guardAtmosInstalled();
+    await guardAtmosInstalled(pathToCLI);
 
     // Create listeners to receive output (in memory) as well
     const stdout = new OutputListener();
@@ -62,4 +62,8 @@ const guardAtmosInstalled = async () => {
   } catch (err: any) {
     core.setFailed(err);
   }
-})();
+};
+
+if (require.main === module) {
+  runWrapper();
+}

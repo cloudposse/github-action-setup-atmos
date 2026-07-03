@@ -1,3 +1,5 @@
+export type ChecksumValidationMode = "warn" | "enforce" | "skip";
+
 export interface IAtmosVersionFile {
   name: string;
   // darwin, linux, windows
@@ -10,10 +12,12 @@ export interface IAtmosVersion {
   name: string;
   prerelease: boolean;
   assets: IAtmosVersionFile[];
+  checksumsUrl?: string;
 }
 
 export interface IAtmosVersionInfo {
   downloadUrl: string;
   resolvedVersion: string;
   fileName: string;
+  checksumsUrl?: string;
 }

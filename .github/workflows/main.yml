@@ -7,9 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
 
       - uses: actions/setup-node@v4
         with:
@@ -20,13 +17,13 @@ jobs:
         run: yarn --frozen-lockfile --prefer-offline
 
       - name: Linting
-        run: yarn lint
+        run: yarn lint:check
 
       - name: Format Source Code
-        run: yarn format
+        run: yarn format:check
 
       - name: Unit Tests
-        run: yarn test
+        run: yarn test:coverage
 
       - name: Build
         run: |
@@ -34,34 +31,46 @@ jobs:
           yarn build
           yarn build:wrapper
 
-      - name: Integration Test
-        uses: ./
-        with:
-          atmos-version: latest
-          install-wrapper: true
-
-      - name: permissions
-        run: |
-          chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos
-          chmod 755 /home/runner/work/github-action-setup-atmos/atmos/atmos-bin
-          cat -v /home/runner/work/github-action-setup-atmos/atmos/atmos
-
-      - name: atmos
-        id: atmos
-        run: atmos version
-
-      - name: Verify outputs are available
-        run: |
-          echo "stdout: ${{ steps.atmos.outputs.stdout }}"
-          echo "stderr: ${{ steps.atmos.outputs.stderr }}"
-          echo "exitcode: ${{ steps.atmos.outputs.exitcode }}"
-
       - name: Commit and Push Changes
         uses: EndBug/add-and-commit@v9
         with:
           committer_name: GitHub Action
           # https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/
           message: "chore: [skip-ci] format code and generate build artifacts"
+
+  integration:
+    name: Integration (${{ matrix.os }}, wrapper=${{ matrix.install-wrapper }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        install-wrapper:
+          - "false"
+          - "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Atmos
+        uses: ./
+        with:
+          atmos-version: latest
+          install-wrapper: ${{ matrix.install-wrapper }}
+
+      - name: Run Atmos
+        id: atmos
+        run: atmos version
+
+      - name: Verify outputs are available
+        if: matrix.install-wrapper == 'true'
+        run: |
+          echo "stdout: ${{ steps.atmos.outputs.stdout }}"
+          echo "stderr: ${{ steps.atmos.outputs.stderr }}"
+          echo "exitcode: ${{ steps.atmos.outputs.exitcode }}"
+
   major-release-tagger:
     runs-on: ubuntu-latest
     steps:
