@@ -1,9 +1,27 @@
+import { realpathSync } from "fs";
+
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
 import * as io from "@actions/io";
 
 import { getAtmosWrappedPath } from "./atmos-bin";
 import { OutputListener } from "./output-listener";
+
+// `require.main === module` is the usual way to detect "this file was run as
+// a script", but @vercel/ncc's bundling of dist/wrapper/index.js rewrites
+// `module` to an internal per-chunk object that never equals Node's real
+// `require.main`, so that check always evaluates to false once installed and
+// executed for real - silently skipping runWrapper() entirely. Comparing
+// resolved paths of process.argv[1] and __filename works reliably across
+// direct invocation, the installer renaming this file to `atmos`, and
+// shebang-based execution, in both bundled and unbundled (ts-jest) contexts.
+const isEntryPoint = (): boolean => {
+  try {
+    return process.argv[1] !== undefined && realpathSync(process.argv[1]) === realpathSync(__filename);
+  } catch {
+    return false;
+  }
+};
 
 const guardAtmosInstalled = async (pathToCLI: string) => {
   // Setting check to `true` will cause `which` to throw if atmos isn't found
@@ -64,7 +82,7 @@ export const runWrapper = async () => {
   }
 };
 
-if (require.main === module) {
+if (isEntryPoint()) {
   void runWrapper().catch((err) => {
     core.setFailed(err);
   });
