@@ -15,18 +15,17 @@ import { IAtmosVersionInfo } from "../interfaces";
 // test has ever let a real tc.cacheDir() copy run and then actually spawned
 // the resulting wrapper as a real child process.
 //
-// This reproduces the reported "install-wrapper" silent no-op (0s, exit 0,
-// zero output) end to end through the full production install pipeline
-// (install -> real tc.cacheDir copy -> real child-process exec). The second
-// test below ("spawns the cached wrapper...") is the actual reproduction:
-// it fails today with empty stdout and exit code 0. The root cause turns out
-// to be unrelated to tool-cache copy semantics (the first test below shows
-// the copy preserves file presence/permissions just fine) - it's that
-// dist/wrapper/index.js's `if (require.main === module)` entry guard
-// evaluates to false once bundled by @vercel/ncc, so runWrapper() is never
-// invoked at all when the wrapper is run as a script. See
-// wrapper-entrypoint.test.ts, which isolates that specific defect without
-// any tool-cache/installer involvement.
+// This reproduces the previously-reported "install-wrapper" silent no-op (0s,
+// exit 0, zero output) end to end through the full production install
+// pipeline (install -> real tc.cacheDir copy -> real child-process exec). The
+// root cause turned out to be unrelated to tool-cache copy semantics (the
+// first test below shows the copy preserves file presence/permissions just
+// fine) - it was that dist/wrapper/index.js's `if (require.main === module)`
+// entry guard evaluated to false once bundled by @vercel/ncc, so
+// runWrapper() was never invoked at all when the wrapper ran as a script.
+// Fixed in src/wrapper.ts by replacing the guard with a realpath comparison
+// of process.argv[1]/__filename. See wrapper-entrypoint.test.ts, which
+// isolates that specific defect without any tool-cache/installer involvement.
 jest.mock("@actions/tool-cache", () => ({
   ...jest.requireActual("@actions/tool-cache"),
   downloadTool: jest.fn()
