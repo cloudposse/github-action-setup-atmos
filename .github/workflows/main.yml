@@ -108,6 +108,10 @@ jobs:
           printf 'stdout: %s\n' "$ATMOS_STDOUT"
           printf 'stderr: %s\n' "$ATMOS_STDERR"
           printf 'exitcode: %s\n' "$ATMOS_EXITCODE"
+          if [ -z "$ATMOS_STDOUT" ]; then
+            echo "::error::Wrapper produced no stdout output for 'atmos version' — this is the silent no-op regression."
+            exit 1
+          fi
 
   major-release-tagger:
     runs-on: ubuntu-latest

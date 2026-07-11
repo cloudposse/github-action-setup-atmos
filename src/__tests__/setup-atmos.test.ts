@@ -445,6 +445,22 @@ describe("Setup Atmos", () => {
       expect(tc.cacheDir).toHaveBeenCalledWith(atmosInstallPath, "atmos-native", "v1.222.0", "x64");
       expect(core.addPath).toHaveBeenCalledWith("/cache/atmos");
     });
+
+    it("installs and caches when no cached tool exists, with wrapper enabled", async () => {
+      jest.spyOn(tc, "find").mockReturnValue("");
+      jest.spyOn(tc, "cacheDir").mockResolvedValue("/cache/atmos-wrapped");
+      setupInstallSpies("linux");
+
+      await installer.getAtmos("latest", "token test-token", "x64", true, "skip");
+
+      expect(tc.cacheDir).toHaveBeenCalledWith(atmosInstallPath, "atmos-wrapper", "v1.222.0", "x64");
+      // exportVariable fires twice on a fresh wrapped install: once in installWrapperBin
+      // (pre-cache atmosInstallPath - the "old" path from the bug report) and once in
+      // configureInstalledPath after caching (the tool-cache copy - the "new" path).
+      expect(core.exportVariable).toHaveBeenNthCalledWith(1, "ATMOS_CLI_PATH", atmosInstallPath);
+      expect(core.exportVariable).toHaveBeenNthCalledWith(2, "ATMOS_CLI_PATH", "/cache/atmos-wrapped");
+      expect(core.addPath).toHaveBeenCalledWith("/cache/atmos-wrapped");
+    });
   });
 
   describe("run", () => {
