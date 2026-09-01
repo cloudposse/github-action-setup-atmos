@@ -48989,32 +48989,42 @@ const findVersionMatch = (versionSpec, arch = external_os_default().arch(), cand
     }
     return result;
 };
-const getVersionsFromGitHubReleases = async (auth) => {
-    const octokit = new dist_node.Octokit({ auth });
-    const versions = [];
-    for await (const release of octokit.paginate.iterator(octokit.rest.repos.listReleases, {
-        owner: "cloudposse",
-        repo: "atmos"
-    })) {
-        release.data.forEach((r) => {
-            const { tag_name, prerelease } = r;
-            if (!tag_name) {
-                throw new Error(`Release tag is empty`);
-            }
-            const assets = r.assets.flatMap((asset) => {
-                const { name, browser_download_url } = asset;
-                const atmosAsset = parseAtmosReleaseAsset(name, browser_download_url);
-                return atmosAsset ? [atmosAsset] : [];
-            });
-            const checksumsUrl = r.assets.find((asset) => asset.name === getChecksumsAssetName(tag_name))?.browser_download_url;
-            const version = { name: tag_name, prerelease, assets, checksumsUrl };
-            versions.push(version);
-        });
-    }
-    return versions;
+const createOctokit = (auth) => {
+    return new dist_node.Octokit({ auth });
 };
-const getMatchingVersion = async (versionSpec, auth, arch) => {
-    const candidates = await getVersionsFromGitHubReleases(auth);
+const mapReleaseToAtmosVersion = (release) => {
+    const { prerelease, tag_name } = release;
+    if (!tag_name) {
+        throw new Error(`Release tag is empty`);
+    }
+    const assets = release.assets.flatMap((asset) => {
+        const { browser_download_url, name } = asset;
+        const atmosAsset = parseAtmosReleaseAsset(name, browser_download_url);
+        return atmosAsset ? [atmosAsset] : [];
+    });
+    const checksumsUrl = release.assets.find((asset) => asset.name === getChecksumsAssetName(tag_name))?.browser_download_url;
+    return { name: tag_name, prerelease, assets, checksumsUrl };
+};
+const getReleaseByTag = async (versionSpec, auth) => {
+    const octokit = createOctokit(auth);
+    const tag = `v${semver.clean(versionSpec)}`;
+    try {
+        const { data } = await octokit.rest.repos.getReleaseByTag({ owner: "cloudposse", repo: "atmos", tag });
+        return [mapReleaseToAtmosVersion(data)];
+    }
+    catch (e) {
+        if (e instanceof dist_node.RequestError && e.status === 404) {
+            return null;
+        }
+        throw e;
+    }
+};
+const getLatestRelease = async (auth) => {
+    const octokit = createOctokit(auth);
+    const { data } = await octokit.rest.repos.getLatestRelease({ owner: "cloudposse", repo: "atmos" });
+    return [mapReleaseToAtmosVersion(data)];
+};
+const buildVersionInfo = (versionSpec, arch, candidates) => {
     const version = findVersionMatch(versionSpec, arch, candidates);
     if (!version) {
         return null;
@@ -49025,6 +49035,41 @@ const getMatchingVersion = async (versionSpec, auth, arch) => {
         fileName: version.assets[0].name,
         checksumsUrl: version.checksumsUrl
     };
+};
+const resolveFromReleaseList = async (versionSpec, auth, arch) => {
+    const octokit = createOctokit(auth);
+    const seen = [];
+    for await (const page of octokit.paginate.iterator(octokit.rest.repos.listReleases, {
+        owner: "cloudposse",
+        repo: "atmos",
+        per_page: 100
+    })) {
+        page.data.forEach((r) => seen.push(mapReleaseToAtmosVersion(r)));
+        const info = buildVersionInfo(versionSpec, arch, seen);
+        if (info) {
+            return info;
+        }
+    }
+    return null;
+};
+const getMatchingVersion = async (versionSpec, auth, arch) => {
+    // Exact version: fetch just that release by tag.
+    if (semver.valid(versionSpec)) {
+        const candidates = await getReleaseByTag(versionSpec, auth);
+        const info = candidates && buildVersionInfo(versionSpec, arch, candidates);
+        if (info) {
+            return info;
+        }
+    }
+    else if (versionSpec === "latest") {
+        // Latest: fetch just the newest release.
+        const info = buildVersionInfo(versionSpec, arch, await getLatestRelease(auth));
+        if (info) {
+            return info;
+        }
+    }
+    // Ranges, or a fallback when the targeted lookup above found no match: page through the releases.
+    return resolveFromReleaseList(versionSpec, auth, arch);
 };
 const installWrapperBin = async (atmosDownloadPath) => {
     let source = "";
@@ -49055,7 +49100,6 @@ const installWrapperBin = async (atmosDownloadPath) => {
         }
         core.exportVariable("ATMOS_CLI_PATH", atmosDownloadPath);
         return atmosDownloadPath;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
     catch (e) {
         core.setFailed(`Unable to copy ${source} to ${destination}.`);
@@ -49091,23 +49135,34 @@ const installAtmosVersion = async (info, auth, arch, installWrapper, checksumVal
 };
 const getAtmos = async (versionSpec, auth, arch = external_os_default().arch(), installWrapper, checksumValidation = "warn") => {
     const osPlat = external_os_default().platform();
+    const toolCacheName = getToolCacheName(installWrapper);
     core.info(`Attempting to download ${versionSpec}...`);
+    const useCachedTool = (cachedPath, resolved) => {
+        core.info(`Found in cache @ ${cachedPath}`);
+        configureInstalledPath(cachedPath, installWrapper);
+        return { toolPath: cachedPath, info: resolved };
+    };
+    if (semver.valid(versionSpec)) {
+        const cachedPath = tool_cache.find(toolCacheName, versionSpec, arch);
+        if (cachedPath) {
+            return useCachedTool(cachedPath, {
+                downloadUrl: "",
+                resolvedVersion: `v${semver.clean(versionSpec)}`,
+                fileName: ""
+            });
+        }
+    }
     const info = await getMatchingVersion(versionSpec, auth, arch);
     if (!info) {
         throw new Error(`Unable to find atmos version '${versionSpec}' for platform ${osPlat} and architecture ${arch}.`);
     }
     const { resolvedVersion } = info;
-    const toolCacheName = getToolCacheName(installWrapper);
-    // Check to see if the version is already in the local cache
-    let toolPath;
-    toolPath = tool_cache.find(toolCacheName, resolvedVersion, arch);
-    if (toolPath) {
-        core.info(`Found in cache @ ${toolPath}`);
-        configureInstalledPath(toolPath, installWrapper);
-        return { toolPath, info };
+    const cachedPath = tool_cache.find(toolCacheName, resolvedVersion, arch);
+    if (cachedPath) {
+        return useCachedTool(cachedPath, info);
     }
     core.info(`Installing version ${resolvedVersion} from GitHub`);
-    toolPath = await installAtmosVersion(info, auth, arch, installWrapper, checksumValidation);
+    let toolPath = await installAtmosVersion(info, auth, arch, installWrapper, checksumValidation);
     if (osPlat != "win32") {
         toolPath = external_path_.join(toolPath);
     }
