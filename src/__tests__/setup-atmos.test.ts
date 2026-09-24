@@ -5,13 +5,17 @@ import path from "path";
 import * as core from "@actions/core";
 import * as io from "@actions/io";
 import * as tc from "@actions/tool-cache";
+import { RequestError } from "octokit";
 
+import { githubReleaseArm } from "../__fixtures__/github-releases";
 import * as installer from "../installer";
 import { IAtmosVersion, IAtmosVersionInfo } from "../interfaces";
 import { run } from "../main";
 import * as sys from "../system";
 
 const mockPaginateIterator = jest.fn();
+const mockGetReleaseByTag = jest.fn();
+const mockGetLatestRelease = jest.fn();
 
 jest.mock("@actions/core");
 jest.mock("@actions/io");
@@ -23,10 +27,13 @@ jest.mock("octokit", () => ({
     },
     rest: {
       repos: {
-        listReleases: jest.fn()
+        listReleases: jest.fn(),
+        getReleaseByTag: mockGetReleaseByTag,
+        getLatestRelease: mockGetLatestRelease
       }
     }
-  }))
+  })),
+  RequestError: class RequestError extends Error {}
 }));
 
 const repoParent = path.resolve(__dirname, "..", "..", "..");
@@ -109,6 +116,8 @@ describe("Setup Atmos", () => {
     mockPaginateIterator.mockImplementation(async function* paginateReleases() {
       yield { data: [githubRelease] };
     });
+    mockGetReleaseByTag.mockResolvedValue({ data: githubRelease });
+    mockGetLatestRelease.mockResolvedValue({ data: githubRelease });
   });
 
   afterEach(() => {
@@ -182,19 +191,6 @@ describe("Setup Atmos", () => {
       mockPlatform("linux");
 
       expect(installer.findVersionMatch("latest", "arm64", releaseCandidates)).toBeUndefined();
-    });
-
-    it("maps GitHub releases to binary assets plus checksum URLs", async () => {
-      const versions = await installer.getVersionsFromGitHubReleases(undefined);
-
-      expect(versions).toEqual([
-        {
-          name: "v1.222.0",
-          prerelease: false,
-          checksumsUrl: "https://example.test/checksums",
-          assets: releaseCandidates[0].assets
-        }
-      ]);
     });
 
     it("returns resolved version info with checksum URL", async () => {
@@ -460,6 +456,85 @@ describe("Setup Atmos", () => {
       expect(core.exportVariable).toHaveBeenNthCalledWith(1, "ATMOS_CLI_PATH", atmosInstallPath);
       expect(core.exportVariable).toHaveBeenNthCalledWith(2, "ATMOS_CLI_PATH", "/cache/atmos-wrapped");
       expect(core.addPath).toHaveBeenCalledWith("/cache/atmos-wrapped");
+    });
+  });
+
+  describe("optimal cache usage", () => {
+    beforeEach(() => {
+      mockPlatform("linux");
+    });
+
+    it("serves a cached exact version without any GitHub request", async () => {
+      jest.spyOn(tc, "find").mockReturnValue("/cache/atmos");
+
+      const { info } = await installer.getAtmos("1.222.0", undefined, "x64", false);
+
+      expect(info?.resolvedVersion).toEqual("v1.222.0");
+      expect(mockGetReleaseByTag).not.toHaveBeenCalled();
+      expect(mockGetLatestRelease).not.toHaveBeenCalled();
+      expect(mockPaginateIterator).not.toHaveBeenCalled();
+    });
+
+    it("fetches an uncached exact version with a single tagged request", async () => {
+      jest.spyOn(tc, "find").mockReturnValue("");
+      jest.spyOn(tc, "cacheDir").mockResolvedValue("/cache/atmos");
+      setupInstallSpies("linux");
+
+      await installer.getAtmos("1.222.0", undefined, "x64", false, "skip");
+
+      expect(mockGetReleaseByTag).toHaveBeenCalledWith({ owner: "cloudposse", repo: "atmos", tag: "v1.222.0" });
+      expect(mockPaginateIterator).not.toHaveBeenCalled();
+    });
+
+    it("fetches `latest` with a single request", async () => {
+      await installer.getMatchingVersion("latest", undefined, "x64");
+
+      expect(mockGetLatestRelease).toHaveBeenCalledTimes(1);
+      expect(mockPaginateIterator).not.toHaveBeenCalled();
+    });
+
+    it("stops paginating a range at the first matching page", async () => {
+      let pagesFetched = 0;
+      mockPaginateIterator.mockImplementation(async function* paginateReleases() {
+        pagesFetched++;
+        yield { data: [githubRelease] };
+        pagesFetched++;
+        yield { data: [githubRelease] };
+      });
+
+      await installer.getMatchingVersion("1.x", undefined, "x64");
+
+      expect(mockPaginateIterator).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ per_page: 100 }));
+      expect(pagesFetched).toBe(1);
+    });
+
+    it("falls back to pagination when a tagged lookup 404s", async () => {
+      mockGetReleaseByTag.mockRejectedValueOnce(Object.assign(Object.create(RequestError.prototype), { status: 404 }));
+
+      const info = await installer.getMatchingVersion("1.222.0", undefined, "x64");
+
+      expect(mockPaginateIterator).toHaveBeenCalled();
+      expect(info?.resolvedVersion).toEqual("v1.222.0");
+    });
+
+    it("rethrows non-404 errors instead of paginating", async () => {
+      const error = Object.assign(Object.create(RequestError.prototype), { status: 403 });
+      mockGetReleaseByTag.mockRejectedValueOnce(error);
+
+      await expect(installer.getMatchingVersion("1.222.0", undefined, "x64")).rejects.toBe(error);
+      expect(mockPaginateIterator).not.toHaveBeenCalled();
+    });
+
+    it("falls back to pagination when `latest` lacks a matching asset", async () => {
+      mockGetLatestRelease.mockResolvedValueOnce({ data: githubRelease });
+      mockPaginateIterator.mockImplementation(async function* paginateReleases() {
+        yield { data: [githubReleaseArm] };
+      });
+
+      const info = await installer.getMatchingVersion("latest", undefined, "arm64");
+
+      expect(mockPaginateIterator).toHaveBeenCalled();
+      expect(info?.downloadUrl).toEqual("https://example.test/linux-arm64");
     });
   });
 
