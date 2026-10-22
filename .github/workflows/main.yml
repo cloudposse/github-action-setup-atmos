@@ -66,7 +66,7 @@ jobs:
           git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic ${auth_header}" push origin "HEAD:${GITHUB_REF_NAME}"
 
   integration:
-    name: Integration (${{ matrix.os }}, wrapper=${{ matrix.install-wrapper }})
+    name: Integration (${{ matrix.os }}, ${{ matrix.version }}, wrapper=${{ matrix.install-wrapper }})
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -80,6 +80,10 @@ jobs:
         install-wrapper:
           - "false"
           - "true"
+        # `latest` exercises the getLatestRelease path; a pinned version exercises getReleaseByTag.
+        version:
+          - latest
+          - "1.224.1"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -88,10 +92,24 @@ jobs:
           persist-credentials: false
 
       - name: Setup Atmos
+        id: setup
         uses: ./
         with:
-          atmos-version: latest
+          atmos-version: ${{ matrix.version }}
           install-wrapper: ${{ matrix.install-wrapper }}
+
+      - name: Verify resolved version
+        if: matrix.version != 'latest'
+        env:
+          RESOLVED: ${{ steps.setup.outputs.atmos-version }}
+          EXPECTED: ${{ matrix.version }}
+        shell: bash
+        run: |
+          printf 'resolved: %s (expected v%s)\n' "$RESOLVED" "$EXPECTED"
+          if [ "$RESOLVED" != "v${EXPECTED}" ]; then
+            echo "::error::setup-atmos resolved '$RESOLVED' but 'v${EXPECTED}' was requested."
+            exit 1
+          fi
 
       - name: Run Atmos
         id: atmos
